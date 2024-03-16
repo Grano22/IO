@@ -1,0 +1,24 @@
+---- KONCEPCJA ----
+
+1. Gra skradankowa z widokiem z góry
+2. Zadanie gracza przemieszczenie z punktu X -> Y -> Z 
+3. proste plansze z pomieszeniami, przeszkodami i wrogami
+4. sterowanie wasd / myszka tylko do obsługi menu
+5. interakcje z obiekatmi na planszy oraz przedmiotami - przy użyciu przycisku lub po wejściu w niego ( do ustalenia )
+6. przeciwnicy o określonym pathu / po wykryciu gracza zaczynają go gonić / dotknięcie = lose
+7. Elementy pozwalające się schować i zgubić pościg przeciwnika
+8. Specjalne "paliwo" pozwalające pozostać niewykrytym przez wroga
+
+---- TECHNOLOGIA ----
+
+1. JAVA jako base
+2. Silnik: LibGDX
+3. Rep: GitHub
+-- do uzupełnienia --
+
+
+---- FABUŁA -----
+S.A. : Biological Warfare // Special Agent: Biological Warfare
+-- Wstępnie: --
+Specjalny agent próbujący wykraść sekretną broń biologiczną z placówki naukowej złej organizacji na zlecenie komórki rządowej do spraw specjalnych
+-- Prawdopodobnie to jest koniec --
