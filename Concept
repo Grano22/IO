@@ -8,6 +8,9 @@
 6. przeciwnicy o określonym pathu / po wykryciu gracza zaczynają go gonić / dotknięcie = lose
 7. Elementy pozwalające się schować i zgubić pościg przeciwnika
 8. Specjalne "paliwo" pozwalające pozostać niewykrytym przez wroga
+9. Gra składa się z poziomów które się odblokowywują w miarę przechodzenia gry - mozliwość zaczęcia gry od wybranego poziomu po jego odblokowaniu
+10. Brak checkpointów w zamian za to mniejsze mapy
+11. Architektura : Losowo tworzone poziomy z pewnej puli obiektów tak aby każdy poziom się różnił ale nie zaburzał równawagi progresu ( tzn. level 5 nie może być prostszy od level 1 mimo losowego generowania )
 
 ---- TECHNOLOGIA ----
 
