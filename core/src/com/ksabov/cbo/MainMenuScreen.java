@@ -44,6 +44,8 @@ public class MainMenuScreen implements Screen {
     Group group;
 
     public MainMenuScreen(CBO game) {
+    	
+    	
         this.game = game;
         this.stage = new Stage();
 
@@ -81,6 +83,37 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void show() {
+    	Gdx.input.setInputProcessor(stage);
+
+        Table mainTable = new Table();
+        mainTable.setFillParent(true);
+        mainTable.top();
+
+        TextButton playButton = new TextButton("Play", skin);
+        TextButton optionsButton = new TextButton("Options", skin);
+        TextButton exitButton = new TextButton("Exit", skin);
+
+        playButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ((Game)Gdx.app.getApplicationListener()).setScreen(new PlayScreen());
+            }
+        });
+        exitButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Gdx.app.exit();
+            }
+        });
+
+        mainTable.add(playButton);
+        mainTable.row();
+        mainTable.add(optionsButton);
+        mainTable.row();
+        mainTable.add(exitButton);
+
+        stage.addActor(mainTable);
+    }
         rainMusic.play();
     }
 
