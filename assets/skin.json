@@ -1,0 +1,10 @@
+{
+  "skins": [
+    {
+      "localization_name": "XD",
+      "geometry": "gemetry.steve",
+      "texture": "bucket.png",
+      "type": "free"
+    }
+  ]
+}

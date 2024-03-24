@@ -2,6 +2,7 @@ package com.ksabov.cbo;
 
 import java.util.Iterator;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Screen;
@@ -11,14 +12,21 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -29,10 +37,11 @@ import java.util.Optional;
 
 public class MainMenuScreen implements Screen {
     public Player player;
-
     final private CBO game;
     final private OrthographicCamera guiCam;
     final private Stage stage;
+    protected Skin skin;
+    protected TextureAtlas atlas;
     Texture dropImage;
     Sound dropSound;
     Music rainMusic;
@@ -44,8 +53,6 @@ public class MainMenuScreen implements Screen {
     Group group;
 
     public MainMenuScreen(CBO game) {
-    	
-    	
         this.game = game;
         this.stage = new Stage();
 
@@ -67,18 +74,8 @@ public class MainMenuScreen implements Screen {
         //stage.addActor(gameButton);
 
         raindrops = new Array<Rectangle>();
-        spawnRaindrop();
-
-    }
-
-    private void spawnRaindrop() {
-        Rectangle raindrop = new Rectangle();
-        raindrop.x = MathUtils.random(0, 800 - 64);
-        raindrop.y = 480;
-        raindrop.width = 64;
-        raindrop.height = 64;
-        raindrops.add(raindrop);
-        lastDropTime = TimeUtils.nanoTime();
+        //atlas = new TextureAtlas("skin.atlas");
+        //skin = new Skin(Gdx.files.internal("skin.json"), atlas);
     }
 
     @Override
@@ -89,14 +86,29 @@ public class MainMenuScreen implements Screen {
         mainTable.setFillParent(true);
         mainTable.top();
 
-        TextButton playButton = new TextButton("Play", skin);
-        TextButton optionsButton = new TextButton("Options", skin);
-        TextButton exitButton = new TextButton("Exit", skin);
+        //Texture tex = new Texture(Gdx.files.internal("bucket.png"));
+
+        String name = "";
+        Texture normalTexture = new Texture(Gdx.files.internal(name + "droplet.png"));
+        Texture pressedTexture = new Texture(Gdx.files.internal(name + "bucket.png"));
+        Drawable normalDrawable = new TextureRegionDrawable(normalTexture);
+        Drawable pressedDrawable = new TextureRegionDrawable(pressedTexture);
+
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
+        style.up = normalDrawable;
+        style.down = pressedDrawable;
+        BitmapFont font = new BitmapFont();
+        font.setColor(0.5f,0.4f,0,1);
+        style.font = font;
+
+        TextButton playButton = new TextButton("Play", style);
+        TextButton optionsButton = new TextButton("Options", style);
+        TextButton exitButton = new TextButton("Exit", style);
 
         playButton.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                ((Game)Gdx.app.getApplicationListener()).setScreen(new PlayScreen());
+                ((Game)Gdx.app.getApplicationListener()).setScreen(new PlayScreen(game));
             }
         });
         exitButton.addListener(new ClickListener(){
@@ -114,69 +126,12 @@ public class MainMenuScreen implements Screen {
 
         stage.addActor(mainTable);
     }
-        rainMusic.play();
-    }
 
     @Override
     public void render(float delta) {
-         ScreenUtils.clear(0, 0, 0.2f, 1);
+        ScreenUtils.clear(0, 0, 0.2f, 1);
 
-        // TODO: Remove later
-        dropSound.stop();
-        rainMusic.stop();
-
-         guiCam.update();
-         game.batch.setProjectionMatrix(guiCam.combined);
-
-         game.batch.begin();
-         game.font.draw(game.batch, "D:" + dropsGathered, 0, 480);
-
-
-         this.group.addActor(new Wall(50, 170, 10, 300));
-         this.group.addActor(player);
-
-         this.group.draw(game.batch, 0);
-
-         for (Rectangle raindrop : raindrops) {
-            game.batch.draw(dropImage, raindrop.x, raindrop.y);
-         }
-         game.batch.end();
-
-
-         if (Gdx.input.isKeyPressed(Keys.A))
-             player.setX(player.getX() - 200 * Gdx.graphics.getDeltaTime());
-         if (Gdx.input.isKeyPressed(Keys.D))
-             player.setX(player.getX() + 200 * Gdx.graphics.getDeltaTime());
-         if (Gdx.input.isKeyPressed(Keys.W))
-             player.setY(player.getY() + 200 * Gdx.graphics.getDeltaTime());
-         if (Gdx.input.isKeyPressed(Keys.S))
-             player.setY(player.getY() - 200 * Gdx.graphics.getDeltaTime());
-        // TODO: kolizja
-//        Optional<Actor> actor = Optional.ofNullable(player.hit(player.getX(), player.getY(), false));
-//        if (actor.isPresent()) {
-//            System.out.println("test" +Gdx.graphics.getDeltaTime() );
-//            System.out.println(actor.get().toString());
-//        }
-
-        for (Actor renderedActor: group.getChildren()) {
-            if (!(renderedActor instanceof Player)) {
-                if (new Rectangle(player.getX(), player.getY(), player.getWidth(), player.getHeight()).overlaps(new Rectangle(renderedActor.getX(), renderedActor.getY(), renderedActor.getWidth(), renderedActor.getHeight()))) {
-                    System.out.println(renderedActor.getClass().getName());
-                }
-            }
-        }
-
-        // Sprawdzanie czy postać nie jest po za mapą
-//        if (bucket.x < 0)
-//            bucket.x = 0;
-//        if (bucket.x > 800 - 64)
-//            bucket.x = 800 - 64;
-//        if (bucket.y < 0)
-//            bucket.y = 0;
-//        if (bucket.y > 800 - 64)
-//            bucket.y = 800 - 64;
-
-         stage.draw();
+        show();
     }
 
     @Override
