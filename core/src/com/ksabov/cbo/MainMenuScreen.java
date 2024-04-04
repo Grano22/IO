@@ -1,22 +1,16 @@
 package com.ksabov.cbo;
 
-import java.util.Iterator;
-
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -29,42 +23,23 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.TimeUtils;
 
-import java.awt.*;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.ArrayList;
 
-public class MainMenuScreen implements Screen {
-    public Player player;
-    final private CBO game;
+public class MainMenuScreen extends BaseScreen {
     final private OrthographicCamera guiCam;
     final private Stage stage;
-    protected Skin skin;
-    protected TextureAtlas atlas;
-    Texture dropImage;
-    Sound dropSound;
-    Music rainMusic;
-    Rectangle bucket;
-    Array<Rectangle> raindrops;
-    long lastDropTime;
-    int dropsGathered;
+    final private Table mainTable;
+    //Group group;
 
-    Group group;
+    public MainMenuScreen(CBO gameCore) {
+        super(gameCore, gameCore.gameAssetsManager);
 
-    public MainMenuScreen(CBO game) {
-        this.game = game;
-        this.stage = new Stage();
-
-        group = new Group();
-        player = new Player(new Vector2(320 /2 - 480 / 2, 20), 194, 64);
-
-        dropImage = new Texture(Gdx.files.internal("droplet.png"));
-
-
-        dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
-        rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
-        rainMusic.setLooping(true);
+        stage = new Stage();
+        mainTable = createTable();
+        handleStartGameButton();
+//
+//        group = new Group();
 
         guiCam = new OrthographicCamera(320, 480);
         guiCam.position.set(320f / 2f, 480f / 2f, 0);
@@ -73,7 +48,6 @@ public class MainMenuScreen implements Screen {
 //        TextButton gameButton = new TextButton("New game", textButtonStyle);
         //stage.addActor(gameButton);
 
-        raindrops = new Array<Rectangle>();
         //atlas = new TextureAtlas("skin.atlas");
         //skin = new Skin(Gdx.files.internal("skin.json"), atlas);
     }
@@ -82,83 +56,88 @@ public class MainMenuScreen implements Screen {
     public void show() {
     	Gdx.input.setInputProcessor(stage);
 
-        Table mainTable = new Table();
-        mainTable.setFillParent(true);
-        mainTable.top();
+        //mainTable.setFillParent(true);
+        //mainTable.top();
 
         //Texture tex = new Texture(Gdx.files.internal("bucket.png"));
 
-        String name = "";
-        Texture normalTexture = new Texture(Gdx.files.internal(name + "droplet.png"));
-        Texture pressedTexture = new Texture(Gdx.files.internal(name + "bucket.png"));
-        Drawable normalDrawable = new TextureRegionDrawable(normalTexture);
-        Drawable pressedDrawable = new TextureRegionDrawable(pressedTexture);
+//        String name = "";
+//        Texture normalTexture = new Texture(Gdx.files.internal(name + "droplet.png"));
+//        Texture pressedTexture = new Texture(Gdx.files.internal(name + "bucket.png"));
+//        Drawable normalDrawable = new TextureRegionDrawable(normalTexture);
+//        Drawable pressedDrawable = new TextureRegionDrawable(pressedTexture);
 
-        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
-        style.up = normalDrawable;
-        style.down = pressedDrawable;
-        BitmapFont font = new BitmapFont();
-        font.setColor(0.5f,0.4f,0,1);
-        style.font = font;
+//        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
+//        style.up = normalDrawable;
+//        style.down = pressedDrawable;
+//        BitmapFont font = new BitmapFont();
+//        font.setColor(0.5f,0.4f,0,1);
+//        style.font = font;
 
-        TextButton playButton = new TextButton("Play", style);
-        TextButton optionsButton = new TextButton("Options", style);
-        TextButton exitButton = new TextButton("Exit", style);
+        //TextButton playButton = new TextButton("Play", GameAssetsManager.DEFAULT_UI_SKIN);
+//        TextButton playButton = createTextButton("Play", 10, 20, mainTable);
+//        //playButton.getLabel().setColor(new Color(79 / 255.f, 79 / 255.f, 117 / 255.f, 1));
+//        TextButton optionsButton = createTextButton("Options", 10, 70, mainTable);
+//        TextButton exitButton = createTextButton("Exit", 10, 150, mainTable);
 
-        playButton.addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                ((Game)Gdx.app.getApplicationListener()).setScreen(new PlayScreen(game));
-            }
-        });
-        exitButton.addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.exit();
-            }
-        });
+//        playButton.addListener(new ClickListener(){
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                //((Game)Gdx.app.getApplicationListener())
+//                gameCore.changeScreen(new PlayAreaScreen(gameCore));
+//            }
+//        });
+//        exitButton.addListener(new ClickListener(){
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                Gdx.app.exit();
+//            }
+//        });
 
-        mainTable.add(playButton);
-        mainTable.row();
-        mainTable.add(optionsButton);
-        mainTable.row();
-        mainTable.add(exitButton);
+        //mainTable.add(playButton).width(200).height(300).padLeft(10);
+        //mainTable.row();
+//        mainTable.add(optionsButton);
+//        mainTable.row();
+//        mainTable.add(exitButton);
 
         stage.addActor(mainTable);
+    }
+
+
+    private void handleStartGameButton() {
+        createTextButton("New Game", 0, mainTable.getHeight()/10, mainTable);
+
+        Actor newButton = mainTable.getCells().get(0).getActor();
+        newButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent even, float x, float y) {
+//                setScreenWithTransition(
+//                        (BaseScreen) gdxGame.getScreen(),
+//                        new MenuNewGameScreen(gameCore, (BaseScreen) gdxGame.getScreen(), resourceManager),
+//                        new ArrayList<>()
+//                );
+                gameCore.changeScreen(new PlayAreaScreen(gameCore));
+            }
+        });
     }
 
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0.2f, 1);
+        guiCam.update();
+        gameCore.getBatch().setProjectionMatrix(guiCam.combined);
+
+        stage.draw();
+
+//        gameCore.getBatch().begin();
+//        gameCore.getBatch().draw(null, 0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+//        gameCore.getBatch().end();
 
         show();
     }
 
     @Override
-    public void resize(int width, int height) {
-
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
-
-    @Override
     public void dispose() {
-        dropImage.dispose();
-        player.dispose();
-        dropSound.dispose();
-        rainMusic.dispose();
+        super.dispose();
     }
 }

@@ -17,7 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-public class PlayScreen implements Screen {
+public class PlayAreaScreen implements Screen {
     public Player player;
     final private CBO game;
     final private OrthographicCamera guiCam;
@@ -34,7 +34,7 @@ public class PlayScreen implements Screen {
 
     Group group;
 
-    public PlayScreen(CBO game) {
+    public PlayAreaScreen(CBO game) {
         this.game = game;
         this.stage = new Stage();
 
