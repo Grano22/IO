@@ -15,6 +15,7 @@ public class CBO extends Game {
 	private Screen mainMenu;
 	private Screen currentScreen;
 	public GameAssetsManager gameAssetsManager;
+	public DebugHelper debugHelper ;
 
 	@Override
 	public void create() {
@@ -24,6 +25,8 @@ public class CBO extends Game {
 
 		batch = new SpriteBatch();
 		font = new BitmapFont();
+
+		debugHelper = new DebugHelper();
 
 		playableArea = new PlayAreaScreen(this);
 		mainMenu = new MainMenuScreen(this);

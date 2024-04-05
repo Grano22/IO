@@ -13,15 +13,13 @@ public class Player extends Actor {
     public Player(Vector2 position, int width, int height) {
         this.setPosition(position.x, position.y);
         this.setSize(width, height);
-        this.skin = new Texture(Gdx.files.internal("bucket.png"));
+        this.skin = new Texture(Gdx.files.internal("hero_standard_pose.png"));
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
         batch.draw(skin, this.getX(), this.getY(), this.getWidth(), this.getHeight());
     }
-
-
 
     public void dispose() {
         skin.dispose();

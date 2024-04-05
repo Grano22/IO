@@ -5,10 +5,13 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -22,14 +25,15 @@ public class PlayAreaScreen extends BaseScreen {
     public Player player;
     final private OrthographicCamera guiCam;
     final private Stage stage;
-    protected Skin skin;
-    protected TextureAtlas atlas;
     Texture dropImage;
     Sound dropSound;
     Music rainMusic;
     Rectangle bucket;
     long lastDropTime;
     int dropsGathered;
+
+    private final Texture backgroundTexture = new Texture("main_map.png");
+    private final Sprite backgroundSprite = new Sprite(backgroundTexture);
 
     Group group;
 
@@ -39,7 +43,7 @@ public class PlayAreaScreen extends BaseScreen {
         this.stage = new Stage();
 
         group = new Group();
-        player = new Player(new Vector2(320 /2 - 480 / 2, 20), 194, 64);
+        player = new Player(new Vector2(320 /2 - 480 / 2, 20), 62, 62);
 
         dropImage = new Texture(Gdx.files.internal("droplet.png"));
         dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
@@ -54,13 +58,12 @@ public class PlayAreaScreen extends BaseScreen {
     public void show() {
         dropSound.stop();
         rainMusic.stop();
-        gameCore.getBatch().setProjectionMatrix(guiCam.combined);
 
         gameCore.getBatch().begin();
         gameCore.font.draw(gameCore.getBatch(), "D:" + dropsGathered, 0, 480);
 
-        this.group.addActor(new Wall(50, 170, 10, 300));
-        this.group.addActor(player);
+        group.addActor(new Wall(50, 170, 10, 300));
+        group.addActor(player);
 
 
         // TODO: kolizja
@@ -69,14 +72,6 @@ public class PlayAreaScreen extends BaseScreen {
 //            System.out.println("test" +Gdx.graphics.getDeltaTime() );
 //            System.out.println(actor.get().toString());
 //        }
-
-        for (Actor renderedActor: group.getChildren()) {
-            if (!(renderedActor instanceof Player)) {
-                if (new Rectangle(player.getX(), player.getY(), player.getWidth(), player.getHeight()).overlaps(new Rectangle(renderedActor.getX(), renderedActor.getY(), renderedActor.getWidth(), renderedActor.getHeight()))) {
-                    System.out.println(renderedActor.getClass().getName());
-                }
-            }
-        }
 
         // Sprawdzanie czy postać nie jest po za mapą
 //        if (bucket.x < 0)
@@ -87,25 +82,50 @@ public class PlayAreaScreen extends BaseScreen {
 //            bucket.y = 0;
 //        if (bucket.y > 800 - 64)
 //            bucket.y = 800 - 64;
-
     }
 
     private void handleMovement() {
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            LOGGER.info("Pressed A");
+        if (Gdx.input.isKeyPressed(Input.Keys.A) && handleCollision(player.getX() - 200 * Gdx.graphics.getDeltaTime(), player.getY())) {
             player.setX(player.getX() - 200 * Gdx.graphics.getDeltaTime());
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.D) && handleCollision(player.getX() + 200 * Gdx.graphics.getDeltaTime(), player.getY())) {
             player.setX(player.getX() + 200 * Gdx.graphics.getDeltaTime());
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.W) && handleCollision(player.getX(), player.getY() + 200 * Gdx.graphics.getDeltaTime())) {
             player.setY(player.getY() + 200 * Gdx.graphics.getDeltaTime());
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.S) && handleCollision(player.getX() - 200, player.getY() - 200 * Gdx.graphics.getDeltaTime())) {
             player.setY(player.getY() - 200 * Gdx.graphics.getDeltaTime());
+        }
+    }
+
+    private boolean handleCollision(float posX, float posY) {
+        for (Actor renderedActor: group.getChildren()) {
+            if (!(renderedActor instanceof Player)) {
+                if (new Rectangle(posX, posY, player.getWidth(), player.getHeight()).overlaps(new Rectangle(renderedActor.getX(), renderedActor.getY(), renderedActor.getWidth(), renderedActor.getHeight()))) {
+                    //System.out.println(renderedActor.getClass().getName());
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private void handleDebug() {
+        for (Actor renderedActor: group.getChildren()) {
+            if (!(renderedActor instanceof Player)) {
+                gameCore.debugHelper.drawDebugLine(
+                    new Vector2(renderedActor.getX(), renderedActor.getY()),
+                    new Vector2(renderedActor.getX(), renderedActor.getY() + renderedActor.getHeight()),
+                    2,
+                    Color.RED,
+                    guiCam.combined
+                );
+            }
         }
     }
 
@@ -113,13 +133,18 @@ public class PlayAreaScreen extends BaseScreen {
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0.2f, 1);
 
+        //handleDebug();
+        gameCore.getBatch().setProjectionMatrix(guiCam.combined);
+        guiCam.position.set(player.getX() + player.getWidth()/2, player.getY() + player.getHeight()/2, 0);
         guiCam.update();
 
+        backgroundSprite.draw(gameCore.getBatch());
         group.draw(gameCore.getBatch(), 0);
         //gameCore.getBatch().begin();
         //gameCore.getBatch().draw(null, 0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         stage.draw();
         //gameCore.getBatch().end();
+
         handleMovement();
     }
 
