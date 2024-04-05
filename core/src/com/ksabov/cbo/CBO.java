@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class CBO extends Game {
 	public SpriteBatch batch;
 	public BitmapFont font;
+	private Screen playableArea;
+	private Screen mainMenu;
 	private Screen currentScreen;
 	public GameAssetsManager gameAssetsManager;
 
@@ -23,8 +25,9 @@ public class CBO extends Game {
 		batch = new SpriteBatch();
 		font = new BitmapFont();
 
-		currentScreen = new MainMenuScreen(this);
-		this.setScreen(currentScreen);
+		playableArea = new PlayAreaScreen(this);
+		mainMenu = new MainMenuScreen(this);
+		this.changeScreen(mainMenu);
 	}
 
 	@Override
@@ -33,13 +36,17 @@ public class CBO extends Game {
 		font.dispose();
 	}
 
-	public void changeScreen(Screen screen){
+	public void changeScreen(Screen screen) {
 		if (currentScreen != null) {
 			currentScreen.dispose();
 		}
 
 		currentScreen = screen;
 		setScreen(currentScreen);
+	}
+
+	public void switchToPlayableArea() {
+		this.changeScreen(playableArea);
 	}
 
 	public Batch getBatch() {

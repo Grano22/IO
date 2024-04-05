@@ -1,6 +1,7 @@
 package com.ksabov.cbo;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -46,7 +47,7 @@ public class MainMenuScreen extends BaseScreen {
 //                        new MenuNewGameScreen(gameCore, (BaseScreen) gdxGame.getScreen(), resourceManager),
 //                        new ArrayList<>()
 //                );
-                gameCore.changeScreen(new PlayAreaScreen(gameCore));
+                gameCore.switchToPlayableArea();
             }
         });
     }
@@ -78,16 +79,17 @@ public class MainMenuScreen extends BaseScreen {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0.2f, 1);
+        //Gdx.gl.glClearColor(0, 0, 0, 1);
+        //Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         guiCam.update();
         gameCore.getBatch().setProjectionMatrix(guiCam.combined);
 
         stage.draw();
 
-//        gameCore.getBatch().begin();
+        //gameCore.getBatch().begin();
 //        gameCore.getBatch().draw(null, 0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-//        gameCore.getBatch().end();
-
-        show();
+        //gameCore.getBatch().end();
     }
 
     @Override
