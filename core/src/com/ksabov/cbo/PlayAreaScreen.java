@@ -42,20 +42,12 @@ public class PlayAreaScreen extends BaseScreen {
         player = new Player(new Vector2(320 /2 - 480 / 2, 20), 194, 64);
 
         dropImage = new Texture(Gdx.files.internal("droplet.png"));
-
-
         dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
         rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
         rainMusic.setLooping(true);
 
         guiCam = new OrthographicCamera(320, 480);
         guiCam.position.set(320f / 2f, 480f / 2f, 0);
-//        TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle();
-//        textButtonStyle.font = font;
-//        TextButton gameButton = new TextButton("New game", textButtonStyle);
-        //stage.addActor(gameButton);
-        //atlas = new TextureAtlas("skin.atlas");
-        //skin = new Skin(Gdx.files.internal("skin.json"), atlas);
     }
 
     @Override
@@ -70,14 +62,7 @@ public class PlayAreaScreen extends BaseScreen {
         this.group.addActor(new Wall(50, 170, 10, 300));
         this.group.addActor(player);
 
-        if (Gdx.input.isKeyPressed(Input.Keys.A))
-            player.setX(player.getX() - 200 * Gdx.graphics.getDeltaTime());
-        if (Gdx.input.isKeyPressed(Input.Keys.D))
-            player.setX(player.getX() + 200 * Gdx.graphics.getDeltaTime());
-        if (Gdx.input.isKeyPressed(Input.Keys.W))
-            player.setY(player.getY() + 200 * Gdx.graphics.getDeltaTime());
-        if (Gdx.input.isKeyPressed(Input.Keys.S))
-            player.setY(player.getY() - 200 * Gdx.graphics.getDeltaTime());
+
         // TODO: kolizja
 //        Optional<Actor> actor = Optional.ofNullable(player.hit(player.getX(), player.getY(), false));
 //        if (actor.isPresent()) {
@@ -105,18 +90,37 @@ public class PlayAreaScreen extends BaseScreen {
 
     }
 
+    private void handleMovement() {
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+            LOGGER.info("Pressed A");
+            player.setX(player.getX() - 200 * Gdx.graphics.getDeltaTime());
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+            player.setX(player.getX() + 200 * Gdx.graphics.getDeltaTime());
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+            player.setY(player.getY() + 200 * Gdx.graphics.getDeltaTime());
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            player.setY(player.getY() - 200 * Gdx.graphics.getDeltaTime());
+        }
+    }
+
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0.2f, 1);
 
         guiCam.update();
 
-        //gameCore.getBatch().begin();
         group.draw(gameCore.getBatch(), 0);
+        //gameCore.getBatch().begin();
         //gameCore.getBatch().draw(null, 0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        //gameCore.getBatch().end();
-
         stage.draw();
+        //gameCore.getBatch().end();
+        handleMovement();
     }
 
     @Override
