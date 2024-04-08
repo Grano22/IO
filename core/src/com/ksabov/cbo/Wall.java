@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.math.Rectangle;
@@ -23,7 +24,7 @@ public class Wall extends Actor {
         this.setColor(Color.RED);
         this.setSize(width, height);
         this.setPosition(x, y);
-        this.setTouchable(Touchable.enabled);
+        //this.setTouchable(Touchable.enabled);
     }
 
     public void draw(Batch batch, float alpha) {
@@ -36,11 +37,11 @@ public class Wall extends Actor {
         shapeRenderer.rect(this.getX(), this.getY(), this.getWidth(), this.getHeight());
         shapeRenderer.end();
         batch.begin();
-    }
-
-    public boolean overlaps(Rectangle playerHitbox)
-    {
-        return new Rectangle(getX(),getY(),getWidth(),getHeight()).overlaps(playerHitbox);
+        Texture texture = new Texture("wall.jpg");
+        texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        texture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+        TextureRegion textureRegion = new TextureRegion(texture,0,0, 2000, 2000);
+        batch.draw(textureRegion, this.getX(), this.getY(), this.getWidth(), this.getHeight());
     }
 
 //    @Override

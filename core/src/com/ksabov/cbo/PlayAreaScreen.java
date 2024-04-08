@@ -9,17 +9,18 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.maps.Map;
+import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.ksabov.cbo.behaviour.UserControlReagent;
+import com.ksabov.cbo.factory.MapBoundariesFactory;
+import com.ksabov.cbo.factory.MapFactory;
 
 public class PlayAreaScreen extends BaseScreen {
     public Player player;
@@ -67,9 +68,21 @@ public class PlayAreaScreen extends BaseScreen {
         inputMultiplexer.addProcessor(stage);
         inputMultiplexer.addProcessor(userControlReagent);
 
+        // Walls
+        MapActor randomWall = new MapActor(new Wall(50, 170, 10, 300));
+        MapLayer layerOfWalls = new MapLayer();
+        layerOfWalls.getObjects().add(randomWall);
+
         // Map
+        final int tileWidth = 42;
+        final int tileHeight = 42;
+        final int mapWidth = 25;
+        final int mapHeight = 25;
+
         //gameMapRenderer = new GameMapRenderer();
-        currentMap = mapFactory.create();
+        currentMap = mapFactory.create(tileWidth, tileHeight, mapWidth, mapHeight);
+        currentMap.getLayers().add(MapBoundariesFactory.createMapBoundaries(0, 0, mapWidth * tileWidth, mapHeight * tileHeight));
+        currentMap.getLayers().add(layerOfWalls);
         gameMapRenderer = new OrthogonalTiledMapRenderer(currentMap);
         //gameMapRenderer.setView(guiCam);
 
@@ -77,7 +90,8 @@ public class PlayAreaScreen extends BaseScreen {
         gameObjects = new GameObjectCollection();
 
         // Player
-        player = new Player(new Vector2(320 /2 - 480 / 2, 20), 62, 62);
+        player = new Player(new Vector2(200, 200), 62, 62);
+        group.addActor(player);
 
         dropImage = new Texture(Gdx.files.internal("droplet.png"));
         dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
@@ -86,7 +100,16 @@ public class PlayAreaScreen extends BaseScreen {
         ///rainMusic.play();
         rainMusic.setLooping(true);
 
+        backgroundSprite.setPosition(-577, -560);
 
+
+        for (MapLayer layer: currentMap.getLayers()) {
+            for (MapObject mapObject: layer.getObjects()) {
+                if (mapObject instanceof MapActor) {
+                    group.addActor(((MapActor)mapObject).getActor());
+                }
+            }
+        }
     }
 
     @Override
@@ -94,14 +117,8 @@ public class PlayAreaScreen extends BaseScreen {
         //dropSound.stop();
         //rainMusic.stop();
 
-        backgroundSprite.setPosition(-577, -560);
-
         gameCore.getBatch().begin();
         gameCore.font.draw(gameCore.getBatch(), "D:" + dropsGathered, 0, 480);
-
-        group.addActor(new Wall(50, 170, 10, 300));
-        group.addActor(player);
-
 
         // TODO: kolizja
 //        Optional<Actor> actor = Optional.ofNullable(player.hit(player.getX(), player.getY(), false));
@@ -145,7 +162,9 @@ public class PlayAreaScreen extends BaseScreen {
     private boolean handleCollision(float posX, float posY) {
         for (Actor renderedActor: group.getChildren()) {
             if (!(renderedActor instanceof Player)) {
-                if (new Rectangle(posX, posY, player.getWidth(), player.getHeight()).overlaps(new Rectangle(renderedActor.getX(), renderedActor.getY(), renderedActor.getWidth(), renderedActor.getHeight()))) {
+                Rectangle playerCollision = new Rectangle(posX + 10, posY - 10, player.getWidth() - 10, player.getHeight() - 10);
+                Rectangle objectCollision = new Rectangle(renderedActor.getX(), renderedActor.getY(), renderedActor.getWidth(), renderedActor.getHeight());
+                if (playerCollision.overlaps(objectCollision)) {
                     //System.out.println(renderedActor.getClass().getName());
                     return false;
                 }
@@ -194,11 +213,7 @@ public class PlayAreaScreen extends BaseScreen {
         stage.draw();
         //gameCore.getBatch().end();
 
-
-
-
         handleMovement();
-
     }
 
     @Override
