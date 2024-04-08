@@ -2,6 +2,7 @@ package com.ksabov.cbo;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -11,12 +12,14 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.Map;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.ksabov.cbo.behaviour.UserControlReagent;
 
 public class PlayAreaScreen extends BaseScreen {
     public Player player;
@@ -34,33 +37,60 @@ public class PlayAreaScreen extends BaseScreen {
 
     private final MapFactory mapFactory = new MapFactory();
     private TiledMap currentMap;
+    private World world;
     private OrthogonalTiledMapRenderer gameMapRenderer;
 
     Group group;
 
+    private final InputMultiplexer inputMultiplexer;
+
     private final GameObjectCollection gameObjects;
+
+    private final UserControlReagent userControlReagent;
 
     public PlayAreaScreen(CBO game) {
         super(game, game.gameAssetsManager);
 
+        float w = Gdx.graphics.getWidth();
+        float h = Gdx.graphics.getHeight();
+
+        // Rendering
+        stage = new Stage();
+        group = new Group();
+
+        // Camera
+        guiCam = new OrthographicCamera();
+        guiCam.setToOrtho(false, w, h);
+
+        // Controls
+        inputMultiplexer = new InputMultiplexer();
+        userControlReagent = new UserControlReagent(guiCam);
+        inputMultiplexer.addProcessor(stage);
+        inputMultiplexer.addProcessor(userControlReagent);
+
+        // Map
+        world = new World(new Vector2(0, -1f), true);
         //gameMapRenderer = new GameMapRenderer();
         currentMap = mapFactory.create();
         gameMapRenderer = new OrthogonalTiledMapRenderer(currentMap);
-        gameObjects = new GameObjectCollection();
-        this.stage = new Stage();
+        //gameMapRenderer.setView(guiCam);
 
-        group = new Group();
+        // Game objects
+        gameObjects = new GameObjectCollection();
+
+        // World
+        Body playerBody = world.createBody(player.getBody());
+
         player = new Player(new Vector2(320 /2 - 480 / 2, 20), 62, 62);
 
         dropImage = new Texture(Gdx.files.internal("droplet.png"));
         dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
         rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
-        dropSound.play();
-        rainMusic.play();
+        //dropSound.play();
+        ///rainMusic.play();
         rainMusic.setLooping(true);
 
-        guiCam = new OrthographicCamera(320, 480);
-        guiCam.position.set(320f / 2f, 480f / 2f, 0);
+
     }
 
     @Override
@@ -145,14 +175,23 @@ public class PlayAreaScreen extends BaseScreen {
 
     @Override
     public void render(float delta) {
+        float w = Gdx.graphics.getWidth();
+        float h = Gdx.graphics.getHeight();
+
         ScreenUtils.clear(0, 0, 0.2f, 1);
+        Gdx.input.setInputProcessor(inputMultiplexer);
+
+        gameMapRenderer.setView(guiCam);
+        gameMapRenderer.render();
 
         //handleDebug();
-        gameCore.getBatch().setProjectionMatrix(guiCam.combined);
+        //guiCam.translate(player.getX() + player.getWidth()/2, player.getY() + player.getHeight()/2);
         guiCam.position.set(player.getX() + player.getWidth()/2, player.getY() + player.getHeight()/2, 0);
         guiCam.update();
+        gameCore.getBatch().setProjectionMatrix(guiCam.combined);
+        //guiCam.setToOrtho(false, (w / h) * 320, 320);
 
-        backgroundSprite.draw(gameCore.getBatch());
+        //backgroundSprite.draw(gameCore.getBatch());
         group.draw(gameCore.getBatch(), 0);
         //gameCore.getBatch().begin();
         //gameCore.getBatch().draw(null, 0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -160,10 +199,18 @@ public class PlayAreaScreen extends BaseScreen {
         //gameCore.getBatch().end();
 
 
-        gameMapRenderer.render();
+
 
         handleMovement();
 
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        guiCam.viewportWidth = width;
+        guiCam.viewportHeight = height;
+        //stage.getViewport().update(width, height, true);
+        guiCam.update();
     }
 
     @Override
