@@ -12,23 +12,15 @@ public class Player extends Actor {
     final Texture skin;
     final static int MOVEMENT_SPEED = 200;
 
-    final BodyDef body = new BodyDef();
-
     public Player(Vector2 position, int width, int height) {
         this.setPosition(position.x, position.y);
         this.setSize(width, height);
         this.skin = new Texture(Gdx.files.internal("hero_standard_pose.png"));
-        body.type = BodyDef.BodyType.StaticBody;
-        body.position.set(position.x + width/2, position.y + height/2);
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
         batch.draw(skin, this.getX(), this.getY(), this.getWidth(), this.getHeight());
-    }
-
-    public BodyDef getBody() {
-        return body;
     }
 
     public void dispose() {

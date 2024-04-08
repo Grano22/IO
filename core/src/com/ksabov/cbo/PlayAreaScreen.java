@@ -37,7 +37,6 @@ public class PlayAreaScreen extends BaseScreen {
 
     private final MapFactory mapFactory = new MapFactory();
     private TiledMap currentMap;
-    private World world;
     private OrthogonalTiledMapRenderer gameMapRenderer;
 
     Group group;
@@ -69,7 +68,6 @@ public class PlayAreaScreen extends BaseScreen {
         inputMultiplexer.addProcessor(userControlReagent);
 
         // Map
-        world = new World(new Vector2(0, -1f), true);
         //gameMapRenderer = new GameMapRenderer();
         currentMap = mapFactory.create();
         gameMapRenderer = new OrthogonalTiledMapRenderer(currentMap);
@@ -78,9 +76,7 @@ public class PlayAreaScreen extends BaseScreen {
         // Game objects
         gameObjects = new GameObjectCollection();
 
-        // World
-        Body playerBody = world.createBody(player.getBody());
-
+        // Player
         player = new Player(new Vector2(320 /2 - 480 / 2, 20), 62, 62);
 
         dropImage = new Texture(Gdx.files.internal("droplet.png"));
