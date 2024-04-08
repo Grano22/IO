@@ -2,23 +2,20 @@ package com.ksabov.cbo;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.maps.Map;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 public class PlayAreaScreen extends BaseScreen {
@@ -35,11 +32,21 @@ public class PlayAreaScreen extends BaseScreen {
     private final Texture backgroundTexture = new Texture("main_map.png");
     private final Sprite backgroundSprite = new Sprite(backgroundTexture);
 
+    private final MapFactory mapFactory = new MapFactory();
+    private TiledMap currentMap;
+    private OrthogonalTiledMapRenderer gameMapRenderer;
+
     Group group;
+
+    private final GameObjectCollection gameObjects;
 
     public PlayAreaScreen(CBO game) {
         super(game, game.gameAssetsManager);
 
+        //gameMapRenderer = new GameMapRenderer();
+        currentMap = mapFactory.create();
+        gameMapRenderer = new OrthogonalTiledMapRenderer(currentMap);
+        gameObjects = new GameObjectCollection();
         this.stage = new Stage();
 
         group = new Group();
@@ -48,6 +55,8 @@ public class PlayAreaScreen extends BaseScreen {
         dropImage = new Texture(Gdx.files.internal("droplet.png"));
         dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
         rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
+        dropSound.play();
+        rainMusic.play();
         rainMusic.setLooping(true);
 
         guiCam = new OrthographicCamera(320, 480);
@@ -56,8 +65,10 @@ public class PlayAreaScreen extends BaseScreen {
 
     @Override
     public void show() {
-        dropSound.stop();
-        rainMusic.stop();
+        //dropSound.stop();
+        //rainMusic.stop();
+
+        backgroundSprite.setPosition(-577, -560);
 
         gameCore.getBatch().begin();
         gameCore.font.draw(gameCore.getBatch(), "D:" + dropsGathered, 0, 480);
@@ -85,20 +96,23 @@ public class PlayAreaScreen extends BaseScreen {
     }
 
     private void handleMovement() {
-        if (Gdx.input.isKeyPressed(Input.Keys.A) && handleCollision(player.getX() - 200 * Gdx.graphics.getDeltaTime(), player.getY())) {
-            player.setX(player.getX() - 200 * Gdx.graphics.getDeltaTime());
+        Vector2 movementVector = new Vector2(player.getX(), player.getY());
+        final float nextMoveSpeed = Player.MOVEMENT_SPEED * Gdx.graphics.getDeltaTime();
+
+        if (Gdx.input.isKeyPressed(Input.Keys.A) && handleCollision(player.getX() - nextMoveSpeed, player.getY())) {
+            player.setX(player.getX() - nextMoveSpeed);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.D) && handleCollision(player.getX() + 200 * Gdx.graphics.getDeltaTime(), player.getY())) {
-            player.setX(player.getX() + 200 * Gdx.graphics.getDeltaTime());
+        if (Gdx.input.isKeyPressed(Input.Keys.D) && handleCollision(player.getX() + nextMoveSpeed, player.getY())) {
+            player.setX(player.getX() + nextMoveSpeed);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.W) && handleCollision(player.getX(), player.getY() + 200 * Gdx.graphics.getDeltaTime())) {
-            player.setY(player.getY() + 200 * Gdx.graphics.getDeltaTime());
+        if (Gdx.input.isKeyPressed(Input.Keys.W) && handleCollision(player.getX(), player.getY() + nextMoveSpeed)) {
+            player.setY(player.getY() + nextMoveSpeed);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.S) && handleCollision(player.getX() - 200, player.getY() - 200 * Gdx.graphics.getDeltaTime())) {
-            player.setY(player.getY() - 200 * Gdx.graphics.getDeltaTime());
+        if (Gdx.input.isKeyPressed(Input.Keys.S) && handleCollision(player.getX(), player.getY() - nextMoveSpeed)) {
+            player.setY(player.getY() - nextMoveSpeed);
         }
     }
 
@@ -145,7 +159,11 @@ public class PlayAreaScreen extends BaseScreen {
         stage.draw();
         //gameCore.getBatch().end();
 
+
+        gameMapRenderer.render();
+
         handleMovement();
+
     }
 
     @Override

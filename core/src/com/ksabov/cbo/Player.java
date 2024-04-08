@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 
 public class Player extends Actor {
     final Texture skin;
+    final static int MOVEMENT_SPEED = 200;
 
     public Player(Vector2 position, int width, int height) {
         this.setPosition(position.x, position.y);
