@@ -10,10 +10,12 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -21,6 +23,11 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.ksabov.cbo.behaviour.UserControlReagent;
 import com.ksabov.cbo.factory.MapBoundariesFactory;
 import com.ksabov.cbo.factory.MapFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.IntStream;
 
 public class PlayAreaScreen extends BaseScreen {
     public Player player;
@@ -32,6 +39,9 @@ public class PlayAreaScreen extends BaseScreen {
     Rectangle bucket;
     long lastDropTime;
     int dropsGathered;
+    List<MapActor> wall_list = new ArrayList<MapActor>();
+    Random generator = new Random();
+
 
     private final Texture backgroundTexture = new Texture("main_map.png");
     private final Sprite backgroundSprite = new Sprite(backgroundTexture);
@@ -69,9 +79,74 @@ public class PlayAreaScreen extends BaseScreen {
         inputMultiplexer.addProcessor(userControlReagent);
 
         // Walls
-        MapActor randomWall = new MapActor(new Wall(50, 170, 10, 300));
+        //MapActor randomWall = new MapActor(new Wall(generator.nextInt(1025), generator.nextInt(1025), 32, 32));
+        // Walls should have to types: vertical and horizontal
+        //*up Myśl* Taka myśl żeby podzielić ściany na idące pionowo i poziomo (chodzi o value width i height żeby to jakoś ogarnąć bo jedne muszą mieć statycznie wysokość a drugie szerokość)
+        //*************************************Wazna Uwaga GRACJAN*****************************************************
+        // postać przechodzi przez ściany tylko te ktore maja ujemnego height lub width (renderują się w dół lub w lewo)
+        //ToDo
+        //naprawa kolizji z postacią dla ścian z wartością ujemną
+        //dodanie sprawdzenia kolizji dla ścian aby kończył renderowanie w momencie napotkania przeszkody
+        //dodanie sprawdzenia czy nie renderuje się na istniejącym obiekcie
+        //dodanie drzwi *na potem*
+        int wall_h = 32;
+        int wall_w = 32;
         MapLayer layerOfWalls = new MapLayer();
-        layerOfWalls.getObjects().add(randomWall);
+        //How many objects (walls) should be created
+        for(int i=0; i<(generator.nextInt(10)+7); i++) {
+            float x = generator.nextInt(1025);
+            float y = generator.nextInt(1025);
+            //Generating in how many directions from our start point the wall will go (min 1 max 4)
+            for(int j=0; j<1; ++j) {
+                //Drawing direction
+                int l = (generator.nextInt(4)+1);
+                switch (l) {
+                    case 1:
+                        while(wall_h != 256){
+                            wall_h += 8;
+                        }
+                        System.out.println("x"+x+"y"+y+"wall_h + "+wall_h);
+                       MapActor randomWall = new MapActor(new Wall(x, y, 32, wall_h));
+                        layerOfWalls.getObjects().add(randomWall);
+//                        wall_list.add(randomWall1);
+                        break;
+                    case 2:
+                        while(wall_w != 256){
+                            wall_w += 8;
+                        }
+                        System.out.println("x"+x+"y"+y+"wall_w + "+wall_w);
+                        MapActor randomWall2 = new MapActor(new Wall(x, y, wall_w, 32));
+                        layerOfWalls.getObjects().add(randomWall2);
+//                        wall_list.add(randomWall2);
+                        break;
+                    case 3:
+                        while(wall_w != -256){
+                            wall_w -= 8;
+                        }
+                        System.out.println("x"+x+"y"+y+"wall_w - "+wall_w);
+                        MapActor randomWall3 = new MapActor(new Wall(x, y, wall_w, 32));
+                        layerOfWalls.getObjects().add(randomWall3);
+ //                       wall_list.add(randomWall3);
+                        break;
+                    case 4:
+                        while(wall_h != -256){
+                            wall_h -= 8;
+                        }
+                        System.out.println("x"+x+"y"+y+"wall_h - "+wall_h);
+                        MapActor randomWall4 = new MapActor(new Wall(x, y, 32, wall_h));
+                        layerOfWalls.getObjects().add(randomWall4);
+  //                      wall_list.add(randomWall4);
+                        break;
+                    default:
+                        break;
+                }
+                //MapActor randomWall = new MapActor(new Wall(x, y, wall_w, wall_h));
+                //wall_list.add(randomWall);
+                //layerOfWalls.getObjects().add(randomWall);
+            }
+           // MapActor randomWall = new MapActor(new Wall(x, y, wall_w, wall_h));
+           // layerOfWalls.getObjects().add(randomWall);
+        }
 
         // Map
         final int tileWidth = 42;
