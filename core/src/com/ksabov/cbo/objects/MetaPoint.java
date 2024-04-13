@@ -1,16 +1,18 @@
 package com.ksabov.cbo.objects;
 
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
 public class MetaPoint extends Actor {
-    Vector2 position;
     boolean hit;
 
     public MetaPoint(Vector2 pos) {
-
+        setPosition(pos.x, pos.y);
+        setWidth(42);
+        setHeight(42);
     }
 
     public void setHit(boolean hit) {
@@ -21,11 +23,12 @@ public class MetaPoint extends Actor {
         return hit;
     }
 
-    public void debugSm() {
+    public void debugSm(Camera guiCam) {
         ShapeRenderer shapeRenderer = new ShapeRenderer();
+        shapeRenderer.setProjectionMatrix(guiCam.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(Color.BLACK);
-        shapeRenderer.circle(getX(), getY(), getWidth());
+        shapeRenderer.circle(getX(), getY(), 42);
         shapeRenderer.end();
     }
 }

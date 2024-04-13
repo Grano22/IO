@@ -60,6 +60,8 @@ public class PlayAreaScreen extends BaseScreen {
 
     private final UserControlReagent userControlReagent;
 
+    private final MapGenerationDefinition mapGenerationDefinition;
+
     public PlayAreaScreen(CBO game) {
         super(game, game.gameAssetsManager);
 
@@ -69,6 +71,7 @@ public class PlayAreaScreen extends BaseScreen {
         // Rendering
         stage = new Stage();
         group = new Group();
+        mapGenerationDefinition = new MapGenerationDefinition(1000, 1000, 42);
 
         // Camera
         guiCam = new OrthographicCamera();
@@ -76,7 +79,7 @@ public class PlayAreaScreen extends BaseScreen {
         // Controls
         inputMultiplexer = new InputMultiplexer();
         userControlReagent = new UserControlReagent(guiCam);
-        inputMultiplexer.addProcessor(stage);
+        //inputMultiplexer.addProcessor(stage);
         inputMultiplexer.addProcessor(userControlReagent);
 
         gameObjects = parepareMap(w, h);
@@ -158,15 +161,12 @@ public class PlayAreaScreen extends BaseScreen {
         }
 
         // Map
-        final int tileWidth = 42;
-        final int tileHeight = 42;
-        final int mapWidth = 25;
-        final int mapHeight = 25;
 
         //gameMapRenderer = new GameMapRenderer();
-        currentMap = mapFactory.create(tileWidth, tileHeight, mapWidth, mapHeight);
-        currentMap.getLayers().add(MapBoundariesFactory.createMapBoundaries(0, 0, mapWidth * tileWidth, mapHeight * tileHeight));
+        currentMap = mapFactory.create(mapGenerationDefinition.mapWidth(), mapGenerationDefinition.mapHeight(), mapGenerationDefinition.tileSize());
+        currentMap.getLayers().add(MapBoundariesFactory.createMapBoundaries(0, 0, mapGenerationDefinition.mapWidth(), mapGenerationDefinition.mapHeight()));
         currentMap.getLayers().add(layerOfWalls);
+        currentMap.getLayers().add(objectsLayer);
         gameMapRenderer = new OrthogonalTiledMapRenderer(currentMap);
         //gameMapRenderer.setView(guiCam);
 
@@ -187,7 +187,7 @@ public class PlayAreaScreen extends BaseScreen {
         backgroundSprite.setPosition(-577, -560);
 
         //MetaPoint finalObjective = new MetaPoint(new Vector2((float)(Math.random() * mapWidth), (float)(Math.random() * mapHeight)));
-        MetaPoint finalObjective = new MetaPoint(new Vector2(200, 200));
+        MetaPoint finalObjective = new MetaPoint(new Vector2(300, 300));
         gameObjects.add("finalObjective", finalObjective);
         objectsLayer.getObjects().add(
             new MapActor(finalObjective)
@@ -250,7 +250,7 @@ public class PlayAreaScreen extends BaseScreen {
             if (!(renderedActor instanceof Player)) {
                 Rectangle playerCollision = new Rectangle(Math.abs(posX + 10), Math.abs(posY - 10), player.getWidth() - 10, player.getHeight() - 10);
                 Rectangle objectCollision = new Rectangle(Math.abs(renderedActor.getX()), Math.abs(renderedActor.getY()), renderedActor.getWidth(), renderedActor.getHeight());
-                if (playerCollision.overlaps(objectCollision)) {
+                if (renderedActor instanceof Wall && playerCollision.overlaps(objectCollision)) {
                     //System.out.println(renderedActor.getClass().getName());
                     return false;
                 }
@@ -290,43 +290,27 @@ public class PlayAreaScreen extends BaseScreen {
         gameCore.getBatch().begin();
         gameMapRenderer.setView(guiCam);
         gameMapRenderer.render();
-        //finalObjective.debugSm();
 
-        Pixmap pixmap = new Pixmap(0, 0, Pixmap.Format.RGBA8888);
-        pixmap.setColor(Color.BLACK);
-        pixmap.fillCircle((int) finalObjective.getX(), (int) finalObjective.getY(), (int) finalObjective.getWidth());
-        Texture texture = new Texture(pixmap);
-
-        gameCore.getBatch().draw(texture, (int) finalObjective.getWidth(), (int) finalObjective.getHeight());
-
-        finalObjective.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                System.out.println("smmfddf");
-            };
-        });
-
-        //handleDebug();
         //guiCam.translate(player.getX() + player.getWidth()/2, player.getY() + player.getHeight()/2);
         guiCam.position.set(player.getX() + player.getWidth()/2, player.getY() + player.getHeight()/2, 0);
         guiCam.update();
         gameCore.getBatch().setProjectionMatrix(guiCam.combined);
         //guiCam.setToOrtho(false, (w / h) * 320, 320);
-
         updateObjectState();
 
         //backgroundSprite.draw(gameCore.getBatch());
         //finalObjective.debugSm();
         group.draw(gameCore.getBatch(), 0);
-        //gameCore.getBatch().begin();
+        finalObjective.debugSm(guiCam);
         //gameCore.getBatch().draw(null, 0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        stage.draw();
+        //stage.draw();
         //gameCore.getBatch().end();
 
         handleMovement();
 
         if (finalObjective.isHit()) {
             System.out.println("dssdsds");
+            //FIXME: bugged parepareMap(w, h);
         }
 
         handleDebug();
@@ -345,10 +329,7 @@ public class PlayAreaScreen extends BaseScreen {
                     if (actorType instanceof MetaPoint) {
                         final MetaPoint metaPoint = (MetaPoint) actorType;
                         Rectangle objectSpace = new Rectangle(Math.abs(metaPoint.getX()), Math.abs(metaPoint.getY()), metaPoint.getWidth(), metaPoint.getHeight());
-
-                        if (playerCollision.overlaps(objectSpace)) {
-                            metaPoint.setHit(true);
-                        }
+                        metaPoint.setHit(playerCollision.overlaps(objectSpace));
                     }
                 }
             }

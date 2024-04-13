@@ -8,16 +8,16 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 
 public class                                                                                                                                                                                                                            MapFactory {
-    public TiledMap create(int tileWidth, int tileHeight, int mapWidth, int mapHeight) {
+    public TiledMap create(int mapWidth, int mapHeight, int tileWidth) {
         TiledMap newMap = new TiledMap();
 
         //Texture tiles = new Texture(Gdx.files.internal("brick_moss.jpg"));
         //TextureRegion[][] splitTiles = TextureRegion.split(tiles, tileWidth, tileHeight);
         Texture floorTexture = new Texture(Gdx.files.internal("basic_floor.png"));
         TextureRegion tile = new TextureRegion(floorTexture);
-        tile.setRegion(0, 0, tileWidth, tileHeight);
+        tile.setRegion(0, 0, tileWidth, tileWidth);
 
-        TiledMapTileLayer layer = new TiledMapTileLayer(mapWidth * tileWidth, mapHeight * tileHeight, tileWidth, tileHeight);
+        TiledMapTileLayer layer = new TiledMapTileLayer(mapWidth, mapHeight, tileWidth, tileWidth);
         for (int x = 0; x < mapWidth; x++) {
             for (int y = 0; y < mapHeight; y++) {
                 //Pixmap pixmap = new Pixmap(tileWidth, tileHeight, Pixmap.Format.RGBA8888);
