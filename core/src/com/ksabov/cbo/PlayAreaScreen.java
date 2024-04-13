@@ -7,6 +7,7 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.MapLayer;
@@ -18,11 +19,14 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.ksabov.cbo.behaviour.UserControlReagent;
 import com.ksabov.cbo.factory.MapBoundariesFactory;
 import com.ksabov.cbo.factory.MapFactory;
+import com.ksabov.cbo.objects.MetaPoint;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +42,6 @@ public class PlayAreaScreen extends BaseScreen {
     Music rainMusic;
     Rectangle bucket;
     long lastDropTime;
-    int dropsGathered;
-    List<MapActor> wall_list = new ArrayList<MapActor>();
     Random generator = new Random();
 
 
@@ -70,13 +72,19 @@ public class PlayAreaScreen extends BaseScreen {
 
         // Camera
         guiCam = new OrthographicCamera();
-        guiCam.setToOrtho(false, w, h);
 
         // Controls
         inputMultiplexer = new InputMultiplexer();
         userControlReagent = new UserControlReagent(guiCam);
         inputMultiplexer.addProcessor(stage);
         inputMultiplexer.addProcessor(userControlReagent);
+
+        gameObjects = parepareMap(w, h);
+    }
+
+    private GameObjectCollection parepareMap(float w, float h) {
+        final GameObjectCollection gameObjects;
+        guiCam.setToOrtho(false, w, h);
 
         // Walls
         //MapActor randomWall = new MapActor(new Wall(generator.nextInt(1025), generator.nextInt(1025), 32, 32));
@@ -92,12 +100,13 @@ public class PlayAreaScreen extends BaseScreen {
         int wall_h = 32;
         int wall_w = 32;
         MapLayer layerOfWalls = new MapLayer();
+        MapLayer objectsLayer = new MapLayer();
         //How many objects (walls) should be created
         for(int i=0; i<(generator.nextInt(10)+7); i++) {
             float x = generator.nextInt(1025);
             float y = generator.nextInt(1025);
             //Generating in how many directions from our start point the wall will go (min 1 max 4)
-            for(int j=0; j<1; ++j) {
+            for(int j=0; j<generator.nextInt(4)+1; ++j) {
                 //Drawing direction
                 int l = (generator.nextInt(4)+1);
                 switch (l) {
@@ -171,12 +180,18 @@ public class PlayAreaScreen extends BaseScreen {
         dropImage = new Texture(Gdx.files.internal("droplet.png"));
         dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
         rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
-        //dropSound.play();
-        ///rainMusic.play();
+//        dropSound.play();
+//        rainMusic.play();
         rainMusic.setLooping(true);
 
         backgroundSprite.setPosition(-577, -560);
 
+        //MetaPoint finalObjective = new MetaPoint(new Vector2((float)(Math.random() * mapWidth), (float)(Math.random() * mapHeight)));
+        MetaPoint finalObjective = new MetaPoint(new Vector2(200, 200));
+        gameObjects.add("finalObjective", finalObjective);
+        objectsLayer.getObjects().add(
+            new MapActor(finalObjective)
+        );
 
         for (MapLayer layer: currentMap.getLayers()) {
             for (MapObject mapObject: layer.getObjects()) {
@@ -185,16 +200,12 @@ public class PlayAreaScreen extends BaseScreen {
                 }
             }
         }
+
+        return gameObjects;
     }
 
     @Override
     public void show() {
-        //dropSound.stop();
-        //rainMusic.stop();
-
-        gameCore.getBatch().begin();
-        gameCore.font.draw(gameCore.getBatch(), "D:" + dropsGathered, 0, 480);
-
         // TODO: kolizja
 //        Optional<Actor> actor = Optional.ofNullable(player.hit(player.getX(), player.getY(), false));
 //        if (actor.isPresent()) {
@@ -237,8 +248,8 @@ public class PlayAreaScreen extends BaseScreen {
     private boolean handleCollision(float posX, float posY) {
         for (Actor renderedActor: group.getChildren()) {
             if (!(renderedActor instanceof Player)) {
-                Rectangle playerCollision = new Rectangle(posX + 10, posY - 10, player.getWidth() - 10, player.getHeight() - 10);
-                Rectangle objectCollision = new Rectangle(renderedActor.getX(), renderedActor.getY(), renderedActor.getWidth(), renderedActor.getHeight());
+                Rectangle playerCollision = new Rectangle(Math.abs(posX + 10), Math.abs(posY - 10), player.getWidth() - 10, player.getHeight() - 10);
+                Rectangle objectCollision = new Rectangle(Math.abs(renderedActor.getX()), Math.abs(renderedActor.getY()), renderedActor.getWidth(), renderedActor.getHeight());
                 if (playerCollision.overlaps(objectCollision)) {
                     //System.out.println(renderedActor.getClass().getName());
                     return false;
@@ -250,17 +261,20 @@ public class PlayAreaScreen extends BaseScreen {
     }
 
     private void handleDebug() {
-        for (Actor renderedActor: group.getChildren()) {
-            if (!(renderedActor instanceof Player)) {
-                gameCore.debugHelper.drawDebugLine(
-                    new Vector2(renderedActor.getX(), renderedActor.getY()),
-                    new Vector2(renderedActor.getX(), renderedActor.getY() + renderedActor.getHeight()),
-                    2,
-                    Color.RED,
-                    guiCam.combined
-                );
-            }
-        }
+        gameCore.font.setColor(Color.GREEN);
+        gameCore.font.draw(gameCore.getBatch(), "Player position: " + player.getX() + ", " + player.getY(), 0, 480);
+
+//        for (Actor renderedActor: group.getChildren()) {
+//            if (!(renderedActor instanceof Player)) {
+//                gameCore.debugHelper.drawDebugLine(
+//                    new Vector2(renderedActor.getX(), renderedActor.getY()),
+//                    new Vector2(renderedActor.getX(), renderedActor.getY() + renderedActor.getHeight()),
+//                    2,
+//                    Color.RED,
+//                    guiCam.combined
+//                );
+//            }
+//        }
     }
 
     @Override
@@ -268,11 +282,29 @@ public class PlayAreaScreen extends BaseScreen {
         float w = Gdx.graphics.getWidth();
         float h = Gdx.graphics.getHeight();
 
+        MetaPoint finalObjective = (MetaPoint)gameObjects.getObjectByName("finalObjective");
+
         ScreenUtils.clear(0, 0, 0.2f, 1);
         Gdx.input.setInputProcessor(inputMultiplexer);
 
+        gameCore.getBatch().begin();
         gameMapRenderer.setView(guiCam);
         gameMapRenderer.render();
+        //finalObjective.debugSm();
+
+        Pixmap pixmap = new Pixmap(0, 0, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.BLACK);
+        pixmap.fillCircle((int) finalObjective.getX(), (int) finalObjective.getY(), (int) finalObjective.getWidth());
+        Texture texture = new Texture(pixmap);
+
+        gameCore.getBatch().draw(texture, (int) finalObjective.getWidth(), (int) finalObjective.getHeight());
+
+        finalObjective.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                System.out.println("smmfddf");
+            };
+        });
 
         //handleDebug();
         //guiCam.translate(player.getX() + player.getWidth()/2, player.getY() + player.getHeight()/2);
@@ -281,7 +313,10 @@ public class PlayAreaScreen extends BaseScreen {
         gameCore.getBatch().setProjectionMatrix(guiCam.combined);
         //guiCam.setToOrtho(false, (w / h) * 320, 320);
 
+        updateObjectState();
+
         //backgroundSprite.draw(gameCore.getBatch());
+        //finalObjective.debugSm();
         group.draw(gameCore.getBatch(), 0);
         //gameCore.getBatch().begin();
         //gameCore.getBatch().draw(null, 0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -289,6 +324,35 @@ public class PlayAreaScreen extends BaseScreen {
         //gameCore.getBatch().end();
 
         handleMovement();
+
+        if (finalObjective.isHit()) {
+            System.out.println("dssdsds");
+        }
+
+        handleDebug();
+
+        gameCore.getBatch().end();
+    }
+
+    private void updateObjectState() {
+        Rectangle playerCollision = new Rectangle(Math.abs(player.getX() + 10), Math.abs(player.getY() - 10), player.getWidth() - 10, player.getHeight() - 10);
+
+        for (MapLayer layer: currentMap.getLayers()) {
+            for (MapObject mapObject: layer.getObjects()) {
+                if (mapObject instanceof MapActor) {
+                    final Actor actorType = ((MapActor) mapObject).getActor();
+
+                    if (actorType instanceof MetaPoint) {
+                        final MetaPoint metaPoint = (MetaPoint) actorType;
+                        Rectangle objectSpace = new Rectangle(Math.abs(metaPoint.getX()), Math.abs(metaPoint.getY()), metaPoint.getWidth(), metaPoint.getHeight());
+
+                        if (playerCollision.overlaps(objectSpace)) {
+                            metaPoint.setHit(true);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override

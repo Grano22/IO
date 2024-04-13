@@ -1,17 +1,23 @@
 package com.ksabov.cbo;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+
 import java.util.HashMap;
 
 public class GameObjectCollection {
-    private HashMap<String, Wall> walls;
+    private HashMap<String, Actor> actors;
 
     public GameObjectCollection() {
-        walls = new HashMap<>();
+        actors = new HashMap<>();
     }
 
-    public void drawLayers() {
+    public GameObjectCollection add(String name, Actor actor) {
+        actors.put(name, actor);
 
+        return this;
+    }
+
+    public Actor getObjectByName(String name) {
+        return actors.get(name);
     }
 }
