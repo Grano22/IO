@@ -1,4 +1,4 @@
-package com.ksabov.cbo;
+package com.ksabov.cbo.objects;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -10,12 +10,17 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.math.Octree;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.ksabov.cbo.behaviour.Collidable;
 
-public class Wall extends Actor {
-    private ShapeRenderer shapeRenderer;
+//Octree.Collider
+
+public class Wall extends Actor implements Collidable {
+    private final ShapeRenderer shapeRenderer;
     static private boolean projectionMatrixSet;
 
     public Wall(float x, float y, float width, float height) {
@@ -42,6 +47,11 @@ public class Wall extends Actor {
         texture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         TextureRegion textureRegion = new TextureRegion(texture,0,0, 2000, 2000);
         batch.draw(textureRegion, this.getX(), this.getY(), this.getWidth(), this.getHeight());
+    }
+
+    @Override
+    public Rectangle getBoundingRect() {
+        return new Rectangle(getX(), getY(), getWidth(), getHeight());
     }
 
 //    @Override

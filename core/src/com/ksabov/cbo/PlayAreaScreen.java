@@ -7,31 +7,31 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.ksabov.cbo.behaviour.IntersectionDetector;
+import com.ksabov.cbo.behaviour.Intersectional;
 import com.ksabov.cbo.behaviour.UserControlReagent;
 import com.ksabov.cbo.factory.MapBoundariesFactory;
 import com.ksabov.cbo.factory.MapFactory;
 import com.ksabov.cbo.objects.MetaPoint;
+import com.ksabov.cbo.objects.Wall;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.IntStream;
+import java.lang.ref.WeakReference;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class PlayAreaScreen extends BaseScreen {
     public Player player;
@@ -41,26 +41,25 @@ public class PlayAreaScreen extends BaseScreen {
     Sound dropSound;
     Music rainMusic;
     Rectangle bucket;
-    long lastDropTime;
     Random generator = new Random();
 
-
+    private final IntersectionDetector intersectionDetector;
     private final Texture backgroundTexture = new Texture("main_map.png");
     private final Sprite backgroundSprite = new Sprite(backgroundTexture);
-
     private final MapFactory mapFactory = new MapFactory();
     private TiledMap currentMap;
     private OrthogonalTiledMapRenderer gameMapRenderer;
-
     Group group;
 
     private final InputMultiplexer inputMultiplexer;
-
     private final GameObjectCollection gameObjects;
-
     private final UserControlReagent userControlReagent;
-
     private final MapGenerationDefinition mapGenerationDefinition;
+
+    private final Debugger debugger;
+
+    private final WeakHashMap<Actor, Action> actions = new WeakHashMap<>();
+    //private final Queue<Action> actionsQue = new PriorityQueue<>();
 
     public PlayAreaScreen(CBO game) {
         super(game, game.gameAssetsManager);
@@ -73,6 +72,9 @@ public class PlayAreaScreen extends BaseScreen {
         group = new Group();
         mapGenerationDefinition = new MapGenerationDefinition(1000, 1000, 42);
 
+        // Game objects
+        gameObjects = new GameObjectCollection();
+
         // Camera
         guiCam = new OrthographicCamera();
 
@@ -82,11 +84,15 @@ public class PlayAreaScreen extends BaseScreen {
         //inputMultiplexer.addProcessor(stage);
         inputMultiplexer.addProcessor(userControlReagent);
 
-        gameObjects = parepareMap(w, h);
+        // Interactions
+        parepareMap(w, h);
+        intersectionDetector = new IntersectionDetector(new WeakReference<>(gameObjects));
+
+        // Debug
+        debugger = new Debugger(game.getBatch().getProjectionMatrix());
     }
 
     private GameObjectCollection parepareMap(float w, float h) {
-        final GameObjectCollection gameObjects;
         guiCam.setToOrtho(false, w, h);
 
         // Walls
@@ -164,14 +170,19 @@ public class PlayAreaScreen extends BaseScreen {
 
         //gameMapRenderer = new GameMapRenderer();
         currentMap = mapFactory.create(mapGenerationDefinition.mapWidth(), mapGenerationDefinition.mapHeight(), mapGenerationDefinition.tileSize());
-        currentMap.getLayers().add(MapBoundariesFactory.createMapBoundaries(0, 0, mapGenerationDefinition.mapWidth(), mapGenerationDefinition.mapHeight()));
+        ArrayList<Wall> boundaryWalls = MapBoundariesFactory.createMapBoundaries(0, 0, mapGenerationDefinition.mapWidth(), mapGenerationDefinition.mapHeight());
+        MapLayer boundaryWallsLayer = new MapLayer();
+        boundaryWalls.forEach(wall -> {
+            boundaryWallsLayer.getObjects().add(new MapActor(wall));
+            gameObjects.add(wall.getName(), wall);
+        });
+        currentMap.getLayers().add(boundaryWallsLayer);
         currentMap.getLayers().add(layerOfWalls);
         currentMap.getLayers().add(objectsLayer);
         gameMapRenderer = new OrthogonalTiledMapRenderer(currentMap);
         //gameMapRenderer.setView(guiCam);
 
-        // Game objects
-        gameObjects = new GameObjectCollection();
+
 
         // Player
         player = new Player(new Vector2(200, 200), 62, 62);
@@ -206,42 +217,41 @@ public class PlayAreaScreen extends BaseScreen {
 
     @Override
     public void show() {
-        // TODO: kolizja
-//        Optional<Actor> actor = Optional.ofNullable(player.hit(player.getX(), player.getY(), false));
-//        if (actor.isPresent()) {
-//            System.out.println("test" +Gdx.graphics.getDeltaTime() );
-//            System.out.println(actor.get().toString());
-//        }
-
-        // Sprawdzanie czy postać nie jest po za mapą
-//        if (bucket.x < 0)
-//            bucket.x = 0;
-//        if (bucket.x > 800 - 64)
-//            bucket.x = 800 - 64;
-//        if (bucket.y < 0)
-//            bucket.y = 0;
-//        if (bucket.y > 800 - 64)
-//            bucket.y = 800 - 64;
     }
 
     private void handleMovement() {
-        Vector2 movementVector = new Vector2(player.getX(), player.getY());
+        MoveToAction moveAction = new MoveToAction();
+        moveAction.setStartPosition(player.getX(), player.getY());
         final float nextMoveSpeed = Player.MOVEMENT_SPEED * Gdx.graphics.getDeltaTime();
 
         if (Gdx.input.isKeyPressed(Input.Keys.A) && handleCollision(player.getX() - nextMoveSpeed, player.getY())) {
             player.setX(player.getX() - nextMoveSpeed);
+            moveAction.setX(player.getX() - nextMoveSpeed);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.D) && handleCollision(player.getX() + nextMoveSpeed, player.getY())) {
             player.setX(player.getX() + nextMoveSpeed);
+            moveAction.setX(player.getX() + nextMoveSpeed);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.W) && handleCollision(player.getX(), player.getY() + nextMoveSpeed)) {
             player.setY(player.getY() + nextMoveSpeed);
+            moveAction.setY(player.getY() + nextMoveSpeed);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.S) && handleCollision(player.getX(), player.getY() - nextMoveSpeed)) {
             player.setY(player.getY() - nextMoveSpeed);
+            moveAction.setY(player.getY() - nextMoveSpeed);
+        }
+
+        actions.put(player, moveAction);
+        //actionsQue.add(moveAction);
+
+        Intersectional intersectionObj = intersectionDetector.willIntersectWith(player, moveAction);
+        if (intersectionObj != null) {
+            System.out.println("intersectionObj");
+        } else {
+
         }
     }
 
@@ -263,6 +273,15 @@ public class PlayAreaScreen extends BaseScreen {
     private void handleDebug() {
         gameCore.font.setColor(Color.GREEN);
         gameCore.font.draw(gameCore.getBatch(), "Player position: " + player.getX() + ", " + player.getY(), 0, 480);
+
+        debugger.setProjectionMatrix(gameCore.getBatch().getProjectionMatrix());
+        debugger.debugCollision(player, Color.RED);
+        for (Actor gameObject: gameObjects) {
+            if (gameObject instanceof Intersectional) {
+                Intersectional intersectional = (Intersectional) gameObject;
+                debugger.debugCollision(intersectional, Color.BLUE);
+            }
+        }
 
 //        for (Actor renderedActor: group.getChildren()) {
 //            if (!(renderedActor instanceof Player)) {
@@ -310,7 +329,8 @@ public class PlayAreaScreen extends BaseScreen {
 
         if (finalObjective.isHit()) {
             System.out.println("dssdsds");
-            //FIXME: bugged parepareMap(w, h);
+            finalObjective.setHit(false);
+            //FIXME: bugged gameObjects = parepareMap(w, h);
         }
 
         handleDebug();
@@ -336,6 +356,10 @@ public class PlayAreaScreen extends BaseScreen {
         }
     }
 
+    private void finishLevel() {
+        actions.clear();
+    }
+
     @Override
     public void resize(int width, int height) {
         guiCam.viewportWidth = width;
@@ -346,6 +370,7 @@ public class PlayAreaScreen extends BaseScreen {
 
     @Override
     public void dispose() {
+        intersectionDetector.dispose();
         dropImage.dispose();
         player.dispose();
         dropSound.dispose();

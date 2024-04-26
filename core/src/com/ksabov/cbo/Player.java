@@ -5,17 +5,27 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.ksabov.cbo.behaviour.Collidable;
 
-public class Player extends Actor {
+public class Player extends Actor implements Collidable {
     final Texture skin;
     final static int MOVEMENT_SPEED = 800;
+    final Rectangle boundingRect;
+
+    enum State {
+        RUNNING
+    }
+
+    State currentState = State.RUNNING;
 
     public Player(Vector2 position, int width, int height) {
         this.setPosition(position.x, position.y);
         this.setSize(width, height);
         this.skin = new Texture(Gdx.files.internal("hero_standard_pose.png"));
+        boundingRect = updateCollision();
     }
 
     @Override
@@ -23,7 +33,39 @@ public class Player extends Actor {
         batch.draw(skin, this.getX(), this.getY(), this.getWidth(), this.getHeight());
     }
 
+//    public void drawDebug(ShapeRenderer renderer) {
+//        renderer.rect(
+//            this.getBoundingRectangle().getCenterX(),
+//            this.getBoundingRectangle().getCenterY(),
+//            this.getBoundingRectangle().getWidth(),
+//            this.getBoundingRectangle().getHeight()
+//        );
+//    }
+
     public void dispose() {
         skin.dispose();
+    }
+
+    @Override
+    public void setX(float x) {
+        super.setX(x);
+        boundingRect.set(updateCollision());
+    }
+
+    @Override
+    public void setY(float y) {
+        super.setY(y);
+        boundingRect.set(updateCollision());
+    }
+
+    @Override
+    public Rectangle getBoundingRect() {
+        return boundingRect;
+    }
+
+    private Rectangle updateCollision() {
+        float newWidth = getWidth() - 40;
+        float newHeight = getHeight() - 15;
+        return new Rectangle(getX() + newWidth, getY(), newWidth, newHeight);
     }
 }
