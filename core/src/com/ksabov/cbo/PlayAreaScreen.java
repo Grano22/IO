@@ -26,6 +26,7 @@ import com.ksabov.cbo.behaviour.Intersectional;
 import com.ksabov.cbo.behaviour.UserControlReagent;
 import com.ksabov.cbo.factory.MapBoundariesFactory;
 import com.ksabov.cbo.factory.MapFactory;
+import com.ksabov.cbo.factory.RoomsFactory;
 import com.ksabov.cbo.objects.MetaPoint;
 import com.ksabov.cbo.objects.Wall;
 
@@ -46,9 +47,15 @@ public class PlayAreaScreen extends BaseScreen {
     private final IntersectionDetector intersectionDetector;
     private final Texture backgroundTexture = new Texture("main_map.png");
     private final Sprite backgroundSprite = new Sprite(backgroundTexture);
+
+    // Map
     private final MapFactory mapFactory = new MapFactory();
     private TiledMap currentMap;
+    private final RoomsFactory roomsFactory = new RoomsFactory();
+    private final Map<String, Room> rooms = new HashMap<>();
     private OrthogonalTiledMapRenderer gameMapRenderer;
+
+    // Draw
     Group group;
 
     private final InputMultiplexer inputMultiplexer;
@@ -106,67 +113,68 @@ public class PlayAreaScreen extends BaseScreen {
         //dodanie sprawdzenia kolizji dla ścian aby kończył renderowanie w momencie napotkania przeszkody
         //dodanie sprawdzenia czy nie renderuje się na istniejącym obiekcie
         //dodanie drzwi *na potem*
-        int wall_h = 32;
-        int wall_w = 32;
-        MapLayer layerOfWalls = new MapLayer();
-        MapLayer objectsLayer = new MapLayer();
-        //How many objects (walls) should be created
-        for(int i=0; i<(generator.nextInt(10)+7); i++) {
-            float x = generator.nextInt(1025);
-            float y = generator.nextInt(1025);
-            //Generating in how many directions from our start point the wall will go (min 1 max 4)
-            for(int j=0; j<generator.nextInt(4)+1; ++j) {
-                //Drawing direction
-                int l = (generator.nextInt(4)+1);
-                switch (l) {
-                    case 1:
-                        while(wall_h != 256){
-                            wall_h += 8;
-                        }
-                        System.out.println("x"+x+"y"+y+"wall_h + "+wall_h);
-                       MapActor randomWall = new MapActor(new Wall(x, y, 32, wall_h));
-                        layerOfWalls.getObjects().add(randomWall);
-//                        wall_list.add(randomWall1);
-                        break;
-                    case 2:
-                        while(wall_w != 256){
-                            wall_w += 8;
-                        }
-                        System.out.println("x"+x+"y"+y+"wall_w + "+wall_w);
-                        MapActor randomWall2 = new MapActor(new Wall(x, y, wall_w, 32));
-                        layerOfWalls.getObjects().add(randomWall2);
-//                        wall_list.add(randomWall2);
-                        break;
-                    case 3:
-                        while(wall_w != -256){
-                            wall_w -= 8;
-                        }
-                        System.out.println("x"+x+"y"+y+"wall_w - "+wall_w);
-                        MapActor randomWall3 = new MapActor(new Wall(x, y, wall_w, 32));
-                        layerOfWalls.getObjects().add(randomWall3);
- //                       wall_list.add(randomWall3);
-                        break;
-                    case 4:
-                        while(wall_h != -256){
-                            wall_h -= 8;
-                        }
-                        System.out.println("x"+x+"y"+y+"wall_h - "+wall_h);
-                        MapActor randomWall4 = new MapActor(new Wall(x, y, 32, wall_h));
-                        layerOfWalls.getObjects().add(randomWall4);
-  //                      wall_list.add(randomWall4);
-                        break;
-                    default:
-                        break;
-                }
-                //MapActor randomWall = new MapActor(new Wall(x, y, wall_w, wall_h));
-                //wall_list.add(randomWall);
-                //layerOfWalls.getObjects().add(randomWall);
-            }
-           // MapActor randomWall = new MapActor(new Wall(x, y, wall_w, wall_h));
-           // layerOfWalls.getObjects().add(randomWall);
-        }
+//        int wall_h = 32;
+//        int wall_w = 32;
+//        MapLayer layerOfWalls = new MapLayer();
+//        //How many objects (walls) should be created
+//        for(int i=0; i<(generator.nextInt(10)+7); i++) {
+//            float x = generator.nextInt(1025);
+//            float y = generator.nextInt(1025);
+//            //Generating in how many directions from our start point the wall will go (min 1 max 4)
+//            for(int j=0; j<generator.nextInt(4)+1; ++j) {
+//                //Drawing direction
+//                int l = (generator.nextInt(4)+1);
+//                switch (l) {
+//                    case 1:
+//                        while(wall_h != 256){
+//                            wall_h += 8;
+//                        }
+//                        System.out.println("x"+x+"y"+y+"wall_h + "+wall_h);
+//                       MapActor randomWall = new MapActor(new Wall(x, y, 32, wall_h));
+//                        layerOfWalls.getObjects().add(randomWall);
+////                        wall_list.add(randomWall1);
+//                        break;
+//                    case 2:
+//                        while(wall_w != 256){
+//                            wall_w += 8;
+//                        }
+//                        System.out.println("x"+x+"y"+y+"wall_w + "+wall_w);
+//                        MapActor randomWall2 = new MapActor(new Wall(x, y, wall_w, 32));
+//                        layerOfWalls.getObjects().add(randomWall2);
+////                        wall_list.add(randomWall2);
+//                        break;
+//                    case 3:
+//                        while(wall_w != -256){
+//                            wall_w -= 8;
+//                        }
+//                        System.out.println("x"+x+"y"+y+"wall_w - "+wall_w);
+//                        MapActor randomWall3 = new MapActor(new Wall(x, y, wall_w, 32));
+//                        layerOfWalls.getObjects().add(randomWall3);
+// //                       wall_list.add(randomWall3);
+//                        break;
+//                    case 4:
+//                        while(wall_h != -256){
+//                            wall_h -= 8;
+//                        }
+//                        System.out.println("x"+x+"y"+y+"wall_h - "+wall_h);
+//                        MapActor randomWall4 = new MapActor(new Wall(x, y, 32, wall_h));
+//                        layerOfWalls.getObjects().add(randomWall4);
+//  //                      wall_list.add(randomWall4);
+//                        break;
+//                    default:
+//                        break;
+//                }
+//                //MapActor randomWall = new MapActor(new Wall(x, y, wall_w, wall_h));
+//                //wall_list.add(randomWall);
+//                //layerOfWalls.getObjects().add(randomWall);
+//            }
+//           // MapActor randomWall = new MapActor(new Wall(x, y, wall_w, wall_h));
+//           // layerOfWalls.getObjects().add(randomWall);
+//        }
 
         // Map
+        ArrayList<Room> newRooms = roomsFactory.create(mapGenerationDefinition);
+
 
         //gameMapRenderer = new GameMapRenderer();
         currentMap = mapFactory.create(mapGenerationDefinition.mapWidth(), mapGenerationDefinition.mapHeight(), mapGenerationDefinition.tileSize());
@@ -177,7 +185,8 @@ public class PlayAreaScreen extends BaseScreen {
             gameObjects.add(wall.getName(), wall);
         });
         currentMap.getLayers().add(boundaryWallsLayer);
-        currentMap.getLayers().add(layerOfWalls);
+        MapLayer objectsLayer = new MapLayer();
+        //currentMap.getLayers().add(layerOfWalls);
         currentMap.getLayers().add(objectsLayer);
         gameMapRenderer = new OrthogonalTiledMapRenderer(currentMap);
         //gameMapRenderer.setView(guiCam);
@@ -222,26 +231,27 @@ public class PlayAreaScreen extends BaseScreen {
     private void handleMovement() {
         MoveToAction moveAction = new MoveToAction();
         moveAction.setStartPosition(player.getX(), player.getY());
+        moveAction.setPosition(player.getX(), player.getY());
         final float nextMoveSpeed = Player.MOVEMENT_SPEED * Gdx.graphics.getDeltaTime();
 
         if (Gdx.input.isKeyPressed(Input.Keys.A) && handleCollision(player.getX() - nextMoveSpeed, player.getY())) {
-            player.setX(player.getX() - nextMoveSpeed);
-            moveAction.setX(player.getX() - nextMoveSpeed);
+            //player.setX(player.getX() - nextMoveSpeed);
+            moveAction.setX(moveAction.getX() - nextMoveSpeed);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.D) && handleCollision(player.getX() + nextMoveSpeed, player.getY())) {
-            player.setX(player.getX() + nextMoveSpeed);
-            moveAction.setX(player.getX() + nextMoveSpeed);
+            //player.setX(player.getX() + nextMoveSpeed);
+            moveAction.setX(moveAction.getX() + nextMoveSpeed);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.W) && handleCollision(player.getX(), player.getY() + nextMoveSpeed)) {
-            player.setY(player.getY() + nextMoveSpeed);
-            moveAction.setY(player.getY() + nextMoveSpeed);
+            //player.setY(player.getY() + nextMoveSpeed);
+            moveAction.setY(moveAction.getY() + nextMoveSpeed);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.S) && handleCollision(player.getX(), player.getY() - nextMoveSpeed)) {
-            player.setY(player.getY() - nextMoveSpeed);
-            moveAction.setY(player.getY() - nextMoveSpeed);
+            //player.setY(player.getY() - nextMoveSpeed);
+            moveAction.setY(moveAction.getY() - nextMoveSpeed);
         }
 
         actions.put(player, moveAction);
@@ -250,9 +260,10 @@ public class PlayAreaScreen extends BaseScreen {
         Intersectional intersectionObj = intersectionDetector.willIntersectWith(player, moveAction);
         if (intersectionObj != null) {
             System.out.println("intersectionObj");
-        } else {
-
+            //return;
         }
+
+        player.setPosition(moveAction.getX(), moveAction.getY());
     }
 
     private boolean handleCollision(float posX, float posY) {

@@ -41,8 +41,6 @@ public class IntersectionDetector implements Disposable {
                         currentBoundingRect.width,
                         currentBoundingRect.height
                 );
-                System.out.println(nextBoundingRect);
-                System.out.println(currentBoundingRect);
                 if (nextBoundingRect.overlaps(intersectionalObject.getBoundingRect())) {
                     return intersectionalObject;
                 }

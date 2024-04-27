@@ -49,13 +49,25 @@ public class Player extends Actor implements Collidable {
     @Override
     public void setX(float x) {
         super.setX(x);
-        boundingRect.set(updateCollision());
+        if (boundingRect != null) {
+            boundingRect.set(updateCollision());
+        }
     }
 
     @Override
     public void setY(float y) {
         super.setY(y);
-        boundingRect.set(updateCollision());
+        if (boundingRect != null) {
+            boundingRect.set(updateCollision());
+        }
+    }
+
+    @Override
+    public void setPosition(float x, float y) {
+        super.setPosition(x, y);
+        if (boundingRect != null) {
+            boundingRect.set(updateCollision());
+        }
     }
 
     @Override
