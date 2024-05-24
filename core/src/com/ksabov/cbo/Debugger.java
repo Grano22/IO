@@ -27,4 +27,8 @@ public class Debugger {
         debugRenderer.rect(boundingRect.x, boundingRect.y, boundingRect.getWidth(), boundingRect.getHeight());
         debugRenderer.end();
     }
+
+    public void debugPosition() {
+
+    }
 }

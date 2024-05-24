@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class CBO extends Game {
+	private final boolean DEBUG = true;
+
 	public SpriteBatch batch;
 	public BitmapFont font;
 	private Screen playableArea;

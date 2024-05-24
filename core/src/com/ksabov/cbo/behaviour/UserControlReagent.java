@@ -53,7 +53,10 @@ public class UserControlReagent implements InputProcessor {
 
     @Override
     public boolean scrolled(float amountX, float amountY) {
-        System.out.println("scrolled: " + amountX + ", " + amountY);
+        if (camera.zoom + amountY <= 0 || camera.zoom + amountY >= 7) {
+            return false;
+        }
+
         camera.zoom += amountY;
 
         return false;

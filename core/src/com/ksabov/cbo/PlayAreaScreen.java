@@ -24,7 +24,6 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.ksabov.cbo.behaviour.IntersectionDetector;
 import com.ksabov.cbo.behaviour.Intersectional;
 import com.ksabov.cbo.behaviour.UserControlReagent;
-import com.ksabov.cbo.factory.MapBoundariesFactory;
 import com.ksabov.cbo.factory.MapFactory;
 import com.ksabov.cbo.factory.RoomsFactory;
 import com.ksabov.cbo.objects.MetaPoint;
@@ -32,7 +31,6 @@ import com.ksabov.cbo.objects.Wall;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class PlayAreaScreen extends BaseScreen {
     public Player player;
@@ -43,6 +41,8 @@ public class PlayAreaScreen extends BaseScreen {
     Music rainMusic;
     Rectangle bucket;
     Random generator = new Random();
+
+    private final RenderingMiddlewareManager renderingMiddlewareManager;
 
     private final IntersectionDetector intersectionDetector;
     private final Texture backgroundTexture = new Texture("main_map.png");
@@ -77,7 +77,8 @@ public class PlayAreaScreen extends BaseScreen {
         // Rendering
         stage = new Stage();
         group = new Group();
-        mapGenerationDefinition = new MapGenerationDefinition(1000, 1000, 42);
+        mapGenerationDefinition = new MapGenerationDefinition(70, 70, 40);
+        renderingMiddlewareManager = new RenderingMiddlewareManager();
 
         // Game objects
         gameObjects = new GameObjectCollection();
@@ -92,14 +93,14 @@ public class PlayAreaScreen extends BaseScreen {
         inputMultiplexer.addProcessor(userControlReagent);
 
         // Interactions
-        parepareMap(w, h);
+        prepareMap(w, h);
         intersectionDetector = new IntersectionDetector(new WeakReference<>(gameObjects));
 
         // Debug
         debugger = new Debugger(game.getBatch().getProjectionMatrix());
     }
 
-    private GameObjectCollection parepareMap(float w, float h) {
+    private void prepareMap(float w, float h) {
         guiCam.setToOrtho(false, w, h);
 
         // Walls
@@ -173,25 +174,32 @@ public class PlayAreaScreen extends BaseScreen {
 //        }
 
         // Map
+        MapLayer roomsLayers = new MapLayer();
         ArrayList<Room> newRooms = roomsFactory.create(mapGenerationDefinition);
-
+        newRooms.forEach(room -> {
+            room.walls.forEach(wall -> {
+                gameObjects.add(wall.getName(), wall);
+                roomsLayers.getObjects().add(new MapActor(wall));
+            });
+        });
 
         //gameMapRenderer = new GameMapRenderer();
         currentMap = mapFactory.create(mapGenerationDefinition.mapWidth(), mapGenerationDefinition.mapHeight(), mapGenerationDefinition.tileSize());
-        ArrayList<Wall> boundaryWalls = MapBoundariesFactory.createMapBoundaries(0, 0, mapGenerationDefinition.mapWidth(), mapGenerationDefinition.mapHeight());
-        MapLayer boundaryWallsLayer = new MapLayer();
-        boundaryWalls.forEach(wall -> {
-            boundaryWallsLayer.getObjects().add(new MapActor(wall));
-            gameObjects.add(wall.getName(), wall);
-        });
-        currentMap.getLayers().add(boundaryWallsLayer);
+
+        currentMap.getLayers().add(roomsLayers);
+
+//        ArrayList<Wall> boundaryWalls = MapBoundariesFactory.createMapBoundaries(0, 0, mapGenerationDefinition.mapWidth(), mapGenerationDefinition.mapHeight());
+//        MapLayer boundaryWallsLayer = new MapLayer();
+//        boundaryWalls.forEach(wall -> {
+//            boundaryWallsLayer.getObjects().add(new MapActor(wall));
+//            gameObjects.add(wall.getName(), wall);
+//        });
+        //currentMap.getLayers().add(boundaryWallsLayer);
         MapLayer objectsLayer = new MapLayer();
         //currentMap.getLayers().add(layerOfWalls);
         currentMap.getLayers().add(objectsLayer);
         gameMapRenderer = new OrthogonalTiledMapRenderer(currentMap);
         //gameMapRenderer.setView(guiCam);
-
-
 
         // Player
         player = new Player(new Vector2(200, 200), 62, 62);
@@ -216,12 +224,13 @@ public class PlayAreaScreen extends BaseScreen {
         for (MapLayer layer: currentMap.getLayers()) {
             for (MapObject mapObject: layer.getObjects()) {
                 if (mapObject instanceof MapActor) {
-                    group.addActor(((MapActor)mapObject).getActor());
+                    MapActor nextMapObject = ((MapActor) mapObject);
+                    renderingMiddlewareManager.beforeAddObject(nextMapObject.getActor());
+                    group.addActor(nextMapObject.getActor());
                 }
             }
         }
 
-        return gameObjects;
     }
 
     @Override
@@ -282,8 +291,8 @@ public class PlayAreaScreen extends BaseScreen {
     }
 
     private void handleDebug() {
-        gameCore.font.setColor(Color.GREEN);
-        gameCore.font.draw(gameCore.getBatch(), "Player position: " + player.getX() + ", " + player.getY(), 0, 480);
+//        gameCore.font.setColor(Color.GREEN);
+//        gameCore.font.draw(gameCore.getBatch(), "Player position: " + player.getX() + ", " + player.getY(), 0, 480);
 
         debugger.setProjectionMatrix(gameCore.getBatch().getProjectionMatrix());
         debugger.debugCollision(player, Color.RED);
