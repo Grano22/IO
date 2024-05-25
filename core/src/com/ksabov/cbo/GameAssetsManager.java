@@ -63,6 +63,12 @@ public class GameAssetsManager {
         TextureRegion floorRegion = new TextureRegion(floorTexture);
 
         mapTextureRegions.put(TiledMapProjection.MARKER_NEUTRAL_FLOOR, floorRegion);
+        mapTextureRegions.put(TiledMapProjection.MARKER_ROOM, floorRegion);
+
+        Texture texture = new Texture("wall.jpg");
+        TextureRegion wallRegion = new TextureRegion(texture);
+
+        mapTextureRegions.put(TiledMapProjection.MARKER_WALL, wallRegion);
     }
 
     public TextureRegion getMapTextureRegion(int kind) {

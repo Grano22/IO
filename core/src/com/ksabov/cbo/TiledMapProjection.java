@@ -23,6 +23,12 @@ public class TiledMapProjection {
         return markerLayers.get(layerId);
     }
 
+    public TiledMapProjection setRawMatrixMarkersLayer(int layerId, int[][] markers) {
+        markerLayers.set(layerId, markers);
+
+        return this;
+    }
+
     public int getWidth() {
         return sizeX;
     }

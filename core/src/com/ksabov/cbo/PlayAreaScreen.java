@@ -24,10 +24,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.ksabov.cbo.behaviour.IntersectionDetector;
 import com.ksabov.cbo.behaviour.Intersectional;
 import com.ksabov.cbo.behaviour.UserControlReagent;
-import com.ksabov.cbo.factory.MapFactory;
-import com.ksabov.cbo.factory.MapFromProjectionFactory;
-import com.ksabov.cbo.factory.MapProjectionFactory;
-import com.ksabov.cbo.factory.RoomsFactory;
+import com.ksabov.cbo.factory.*;
 import com.ksabov.cbo.objects.MetaPoint;
 import com.ksabov.cbo.objects.Wall;
 
@@ -46,6 +43,7 @@ public class PlayAreaScreen extends BaseScreen {
     TiledMapProjection mapProjection;
     MapProjectionFactory mapProjectionFactory;
     MapFromProjectionFactory mapFromProjectionFactory;
+    final RoomMarkersGenerator roomMarkersGenerator;
 
     private final RenderingMiddlewareManager renderingMiddlewareManager;
 
@@ -86,6 +84,7 @@ public class PlayAreaScreen extends BaseScreen {
         renderingMiddlewareManager = new RenderingMiddlewareManager();
         mapProjectionFactory = new MapProjectionFactory();
         mapFromProjectionFactory = new MapFromProjectionFactory(game.gameAssetsManager);
+        roomMarkersGenerator = new RoomMarkersGenerator();
 
         // Game objects
         gameObjects = new GameObjectCollection();
@@ -182,20 +181,21 @@ public class PlayAreaScreen extends BaseScreen {
 //        }
 
         // Map
-        MapLayer roomsLayers = new MapLayer();
-        ArrayList<Room> newRooms = roomsFactory.create(mapGenerationDefinition);
-        newRooms.forEach(room -> {
-            room.walls.forEach(wall -> {
-                gameObjects.add(wall.getName(), wall);
-                roomsLayers.getObjects().add(new MapActor(wall));
-            });
-        });
+//        MapLayer roomsLayers = new MapLayer();
+//        ArrayList<Room> newRooms = roomsFactory.create(mapGenerationDefinition);
+//        newRooms.forEach(room -> {
+//            room.walls.forEach(wall -> {
+//                gameObjects.add(wall.getName(), wall);
+//                roomsLayers.getObjects().add(new MapActor(wall));
+//            });
+//        });
 
         //gameMapRenderer = new GameMapRenderer();
         //currentMap = mapFactory.create(mapGenerationDefinition.mapWidth(), mapGenerationDefinition.mapHeight(), mapGenerationDefinition.tileSize());
+        roomMarkersGenerator.generate(mapProjection);
         currentMap = mapFromProjectionFactory.create(mapProjection);
 
-        currentMap.getLayers().add(roomsLayers);
+        //currentMap.getLayers().add(roomsLayers);
 
 //        ArrayList<Wall> boundaryWalls = MapBoundariesFactory.createMapBoundaries(0, 0, mapGenerationDefinition.mapWidth(), mapGenerationDefinition.mapHeight());
 //        MapLayer boundaryWallsLayer = new MapLayer();
