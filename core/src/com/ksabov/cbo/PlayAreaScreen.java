@@ -25,6 +25,8 @@ import com.ksabov.cbo.behaviour.IntersectionDetector;
 import com.ksabov.cbo.behaviour.Intersectional;
 import com.ksabov.cbo.behaviour.UserControlReagent;
 import com.ksabov.cbo.factory.MapFactory;
+import com.ksabov.cbo.factory.MapFromProjectionFactory;
+import com.ksabov.cbo.factory.MapProjectionFactory;
 import com.ksabov.cbo.factory.RoomsFactory;
 import com.ksabov.cbo.objects.MetaPoint;
 import com.ksabov.cbo.objects.Wall;
@@ -41,6 +43,9 @@ public class PlayAreaScreen extends BaseScreen {
     Music rainMusic;
     Rectangle bucket;
     Random generator = new Random();
+    TiledMapProjection mapProjection;
+    MapProjectionFactory mapProjectionFactory;
+    MapFromProjectionFactory mapFromProjectionFactory;
 
     private final RenderingMiddlewareManager renderingMiddlewareManager;
 
@@ -79,6 +84,8 @@ public class PlayAreaScreen extends BaseScreen {
         group = new Group();
         mapGenerationDefinition = new MapGenerationDefinition(70, 70, 40);
         renderingMiddlewareManager = new RenderingMiddlewareManager();
+        mapProjectionFactory = new MapProjectionFactory();
+        mapFromProjectionFactory = new MapFromProjectionFactory(game.gameAssetsManager);
 
         // Game objects
         gameObjects = new GameObjectCollection();
@@ -102,6 +109,7 @@ public class PlayAreaScreen extends BaseScreen {
 
     private void prepareMap(float w, float h) {
         guiCam.setToOrtho(false, w, h);
+        mapProjection = mapProjectionFactory.create(mapGenerationDefinition);
 
         // Walls
         //MapActor randomWall = new MapActor(new Wall(generator.nextInt(1025), generator.nextInt(1025), 32, 32));
@@ -184,7 +192,8 @@ public class PlayAreaScreen extends BaseScreen {
         });
 
         //gameMapRenderer = new GameMapRenderer();
-        currentMap = mapFactory.create(mapGenerationDefinition.mapWidth(), mapGenerationDefinition.mapHeight(), mapGenerationDefinition.tileSize());
+        //currentMap = mapFactory.create(mapGenerationDefinition.mapWidth(), mapGenerationDefinition.mapHeight(), mapGenerationDefinition.tileSize());
+        currentMap = mapFromProjectionFactory.create(mapProjection);
 
         currentMap.getLayers().add(roomsLayers);
 

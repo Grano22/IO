@@ -2,11 +2,14 @@ package com.ksabov.cbo;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class GameAssetsManager {
@@ -28,6 +31,9 @@ public class GameAssetsManager {
     // BUTTON
     public TextureRegion[][] button;
 
+    // MAP TEXTURE REGIONS
+    private final Map<Integer, TextureRegion> mapTextureRegions = new HashMap<>();
+
     public GameAssetsManager() {
         // ATLAS
         assetManager.load("skins/default_ui/default_menu_ui.atlas", TextureAtlas.class);
@@ -47,5 +53,19 @@ public class GameAssetsManager {
 
         // FONT
         pixel10 = new BitmapFont(); // new BitmapFont(Gdx.files.internal("skins/default_ui/font-export.fnt"), atlas.findRegion("pixel"), false);
+
+        // REGIONS
+        loadTextureRegions();
+    }
+
+    private void loadTextureRegions() {
+        Texture floorTexture = new Texture(Gdx.files.internal("basic_floor.png"));
+        TextureRegion floorRegion = new TextureRegion(floorTexture);
+
+        mapTextureRegions.put(TiledMapProjection.MARKER_NEUTRAL_FLOOR, floorRegion);
+    }
+
+    public TextureRegion getMapTextureRegion(int kind) {
+        return mapTextureRegions.get(kind);
     }
 }

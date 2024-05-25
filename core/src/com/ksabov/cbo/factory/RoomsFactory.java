@@ -23,6 +23,7 @@ public class RoomsFactory {
         int howMuchRoomsX = 0, howMuchRoomsY = 0;
 
         int iter = 0, nextX = 0, nextY = 0;
+
         while (howMuchRemainingTilesX > 0 || howMuchRemainingTilesY > 0) {
             int nextSizeX = howMuchRemainingTilesX <= maxRoomHeight ? howMuchRemainingTilesX : randomizer.nextInt(maxRoomHeight - minRoomWidth) + minRoomWidth;
             int nextSizeY = howMuchRemainingTilesY <= maxRoomHeight ? howMuchRemainingTilesY : randomizer.nextInt(maxRoomHeight - minRoomWidth) + minRoomWidth;

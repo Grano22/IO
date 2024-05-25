@@ -7,6 +7,9 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 
+/**
+ * @deprecated
+ */
 public class                                                                                                                                                                                                                            MapFactory {
     public TiledMap create(int mapWidth, int mapHeight, int tileWidth) {
         TiledMap newMap = new TiledMap();
