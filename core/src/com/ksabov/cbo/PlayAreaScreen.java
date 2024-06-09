@@ -115,7 +115,7 @@ public class PlayAreaScreen extends BaseScreen {
 
         // Map
 //        MapLayer roomsLayers = new MapLayer();
-//        ArrayList<Room> newRooms = roomsFactory.create(mapGenerationDefinition);
+
 //        newRooms.forEach(room -> {
 //            room.walls.forEach(wall -> {
 //                gameObjects.add(wall.getName(), wall);
@@ -124,8 +124,9 @@ public class PlayAreaScreen extends BaseScreen {
 //        });
 
         //gameMapRenderer = new GameMapRenderer();
-        roomMarkersGenerator.generate(mapProjection);
+        ArrayList<Vector2> roomsMarkers = roomMarkersGenerator.generate(mapProjection);
         currentMap = mapFromProjectionFactory.create(mapProjection);
+        ArrayList<Room> generatedRooms = roomsFactory.create(roomsMarkers);
         //MatrixDebugger.printMarkers(mapProjection.getRawMatrixMarkersLayer(0));
 
         //currentMap.getLayers().add(roomsLayers);
@@ -189,7 +190,7 @@ public class PlayAreaScreen extends BaseScreen {
             //player.setX(player.getX() - nextMoveSpeed);
             moveAction.setX(moveAction.getX() - nextMoveSpeed);
             AbstractMap.SimpleImmutableEntry<Integer, Integer> nextCods = tiledMapHelper.getTileCordsByCharacterPosition(mapProjection, player);
-            System.out.println();
+            //System.out.println();
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
@@ -266,8 +267,8 @@ public class PlayAreaScreen extends BaseScreen {
         float h = Gdx.graphics.getHeight();
 
         ConsoleDebugger.clear();
-        System.out.println(player.getX() + " " + player.getY());
-        System.out.println(tiledMapHelper.getTileCordsByCharacterPosition(mapProjection, player));
+        //System.out.println(player.getX() + " " + player.getY());
+        //System.out.println(tiledMapHelper.getTileCordsByCharacterPosition(mapProjection, player));
 
         MetaPoint finalObjective = (MetaPoint)gameObjects.getObjectByName("finalObjective");
 

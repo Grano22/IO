@@ -6,6 +6,7 @@ public class TiledMapProjection {
     final static public int MARKER_NEUTRAL_FLOOR = 0;
     final static public int MARKER_WALL = 1;
     final static public int MARKER_ROOM = 2;
+    final static public int MARKER_ROOM_WALL_CORNER = 3;
 
     private final ArrayList<int[][]> markerLayers;
     private final int sizeX;

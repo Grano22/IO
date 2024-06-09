@@ -7,13 +7,16 @@ import com.ksabov.cbo.objects.Wall;
 import java.util.ArrayList;
 import java.util.Vector;
 
-public class Room extends Actor {
-    ArrayList<Wall> walls;
+public class Room {
+    final String name;
+    final Vector2 position;
+    final float width;
+    final float height;
 
-    public Room(String name, Vector2 position, int width, int height, ArrayList<Wall> walls) {
-        setName(name);
-        setPosition(position.x, position.y);
-        setSize(width, height);
-        this.walls = walls;
+    public Room(String name, Vector2 position, float width, float height) {
+        this.name = name;
+        this.position = position;
+        this.width = width;
+        this.height = height;
     }
 }
