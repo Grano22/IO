@@ -24,7 +24,13 @@ public class TiledMapProjection {
     }
 
     public TiledMapProjection setRawMatrixMarkersLayer(int layerId, int[][] markers) {
-        markerLayers.set(layerId, markers);
+        if (markerLayers.size() > layerId) {
+            markerLayers.set(layerId, markers);
+
+            return this;
+        }
+
+        markerLayers.add(layerId, markers);
 
         return this;
     }

@@ -8,6 +8,9 @@ import com.ksabov.cbo.objects.Wall;
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * @deprecated
+ */
 public class RoomsFactory {
     Random randomizer = new Random();
 

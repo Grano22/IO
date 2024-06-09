@@ -16,7 +16,7 @@ public class RoomMarkersGenerator {
     }
 
     public void generate(TiledMapProjection mapProjection) {
-        int[][] nextMarkers = mapProjection.getRawMatrixMarkersLayer(0);
+        int[][] nextMarkers/* = mapProjection.getRawMatrixMarkersLayer(0)*/ = new int[mapProjection.getWidth()][mapProjection.getHeight()];
 
         final int minRoomWidth = 10;
         final int maxRoomHeight = 25;
@@ -44,6 +44,10 @@ public class RoomMarkersGenerator {
                     nextRoomHeight = posY >= mapProjection.getHeight() - maxRoomHeight ? mapProjection.getHeight() - maxRoomHeight - posY : randomizer.nextInt(maxRoomHeight - minRoomWidth) + minRoomWidth;
                 }
 
+                if (nextRoomWidth == 0 || nextRoomHeight == 0) {
+                    continue;
+                }
+
                 if (posX % nextRoomWidth == 0) {
                     nextMarkers[posX][posY] = TiledMapProjection.MARKER_WALL;
                     remainingX--;
@@ -56,41 +60,6 @@ public class RoomMarkersGenerator {
             }
         }
 
-//        int howMuchRemainingTilesX = mapProjection.getWidth();
-//        int howMuchRemainingTilesY = mapProjection.getHeight();
-//        int howMuchRoomsX = 0, howMuchRoomsY = 0;
-//
-//        int iter = 0, nextX = 0, nextY = 0;
-//
-//        while (howMuchRemainingTilesX > 0 || howMuchRemainingTilesY > 0) {
-//            int nextSizeX = howMuchRemainingTilesX <= maxRoomHeight ? howMuchRemainingTilesX : randomizer.nextInt(maxRoomHeight - minRoomWidth) + minRoomWidth;
-//            int nextSizeY = howMuchRemainingTilesY <= maxRoomHeight ? howMuchRemainingTilesY : randomizer.nextInt(maxRoomHeight - minRoomWidth) + minRoomWidth;
-//
-//            howMuchRemainingTilesX -= nextSizeX;
-//            howMuchRemainingTilesY -= nextSizeY;
-//
-//            nextMarkers[nextX][nextY] = TiledMapProjection.MARKER_WALL;
-//
-//            //nextX += mapProjection.tileSize() * nextSizeX;
-//            nextY += nextSizeY;
-//
-//            howMuchRoomsX += nextSizeX;
-//            howMuchRoomsY += nextSizeY;
-//
-//            iter++;
-//
-//            if (howMuchRemainingTilesY <= 0 && nextX < mapProjection.getWidth()) {
-//                break;
-////                howMuchRemainingTilesY = definition.mapHeight();
-////                nextY = 0;
-////                nextX += definition.tileSize() * nextSizeX;
-//            }
-//
-//            if (iter >= 1000) {
-//                break;
-//            }
-//        }
-
-        mapProjection.setRawMatrixMarkersLayer(0, nextMarkers);
+        mapProjection.setRawMatrixMarkersLayer(1, nextMarkers);
     }
 }
