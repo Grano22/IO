@@ -8,6 +8,7 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 public final class TiledMapHelper {
     public SimpleImmutableEntry<Integer, Integer> getTileCordsByCharacterPosition(TiledMapProjection mapProjection, Actor character) {
         SimpleImmutableEntry<Integer, Integer> tileCords = new SimpleImmutableEntry<>((int)Math.floor(character.getX() / mapProjection.getTileSize()), (int)Math.floor(character.getY() / mapProjection.getTileSize()));
+
         return tileCords;
     }
 

@@ -22,6 +22,7 @@ public class Player extends Actor implements Collidable {
     State currentState = State.RUNNING;
 
     public Player(Vector2 position, int width, int height) {
+        super();
         this.setPosition(position.x, position.y);
         this.setSize(width, height);
         this.skin = new Texture(Gdx.files.internal("hero_standard_pose.png"));
@@ -76,8 +77,9 @@ public class Player extends Actor implements Collidable {
     }
 
     private Rectangle updateCollision() {
-        float newWidth = getWidth() - 40;
-        float newHeight = getHeight() - 15;
-        return new Rectangle(getX() + newWidth, getY(), newWidth, newHeight);
+        float newWidth = getWidth();
+        float newHeight = getHeight();
+
+        return new Rectangle(getX(), getY(), newWidth, newHeight);
     }
 }

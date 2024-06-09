@@ -26,7 +26,6 @@ import com.ksabov.cbo.behaviour.Intersectional;
 import com.ksabov.cbo.behaviour.UserControlReagent;
 import com.ksabov.cbo.factory.*;
 import com.ksabov.cbo.helper.ConsoleDebugger;
-import com.ksabov.cbo.helper.MatrixDebugger;
 import com.ksabov.cbo.helper.TiledMapHelper;
 import com.ksabov.cbo.objects.MetaPoint;
 import com.ksabov.cbo.objects.Wall;
@@ -36,7 +35,7 @@ import java.util.*;
 
 public class PlayAreaScreen extends BaseScreen {
     public Player player;
-    final private OrthographicCamera guiCam;
+    final private OrthographicCamera levelCam;
     final private Stage stage;
     Texture dropImage;
     Sound dropSound;
@@ -94,11 +93,11 @@ public class PlayAreaScreen extends BaseScreen {
         gameObjects = new GameObjectCollection();
 
         // Camera
-        guiCam = new OrthographicCamera();
+        levelCam = new OrthographicCamera();
 
         // Controls
         inputMultiplexer = new InputMultiplexer();
-        userControlReagent = new UserControlReagent(guiCam);
+        userControlReagent = new UserControlReagent(levelCam);
         //inputMultiplexer.addProcessor(stage);
         inputMultiplexer.addProcessor(userControlReagent);
 
@@ -111,7 +110,7 @@ public class PlayAreaScreen extends BaseScreen {
     }
 
     private void prepareMap(float w, float h) {
-        guiCam.setToOrtho(false, w, h);
+        levelCam.setToOrtho(false, w, h);
         mapProjection = mapProjectionFactory.create(mapGenerationDefinition);
 
         // Map
@@ -145,7 +144,7 @@ public class PlayAreaScreen extends BaseScreen {
         //gameMapRenderer.setView(guiCam);
 
         // Player
-        player = new Player(new Vector2(200, 200), 62, 62);
+        player = new Player(new Vector2(200, 200), 30, 48);
         group.addActor(player);
 
         dropImage = new Texture(Gdx.files.internal("droplet.png"));
@@ -267,6 +266,7 @@ public class PlayAreaScreen extends BaseScreen {
         float h = Gdx.graphics.getHeight();
 
         ConsoleDebugger.clear();
+        System.out.println(player.getX() + " " + player.getY());
         System.out.println(tiledMapHelper.getTileCordsByCharacterPosition(mapProjection, player));
 
         MetaPoint finalObjective = (MetaPoint)gameObjects.getObjectByName("finalObjective");
@@ -275,20 +275,20 @@ public class PlayAreaScreen extends BaseScreen {
         Gdx.input.setInputProcessor(inputMultiplexer);
 
         gameCore.getBatch().begin();
-        gameMapRenderer.setView(guiCam);
+        gameMapRenderer.setView(levelCam);
         gameMapRenderer.render();
 
         //guiCam.translate(player.getX() + player.getWidth()/2, player.getY() + player.getHeight()/2);
-        guiCam.position.set(player.getX() + player.getWidth()/2, player.getY() + player.getHeight()/2, 0);
-        guiCam.update();
-        gameCore.getBatch().setProjectionMatrix(guiCam.combined);
+        levelCam.position.set(player.getX() + player.getWidth()/2, player.getY() + player.getHeight()/2, 0);
+        levelCam.update();
+        gameCore.getBatch().setProjectionMatrix(levelCam.combined);
         //guiCam.setToOrtho(false, (w / h) * 320, 320);
         updateObjectState();
 
         //backgroundSprite.draw(gameCore.getBatch());
         //finalObjective.debugSm();
         group.draw(gameCore.getBatch(), 0);
-        finalObjective.debugSm(guiCam);
+        finalObjective.debugSm(levelCam);
         //gameCore.getBatch().draw(null, 0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         //stage.draw();
         //gameCore.getBatch().end();
@@ -330,10 +330,10 @@ public class PlayAreaScreen extends BaseScreen {
 
     @Override
     public void resize(int width, int height) {
-        guiCam.viewportWidth = width;
-        guiCam.viewportHeight = height;
+        levelCam.viewportWidth = width;
+        levelCam.viewportHeight = height;
         //stage.getViewport().update(width, height, true);
-        guiCam.update();
+        levelCam.update();
     }
 
     @Override
