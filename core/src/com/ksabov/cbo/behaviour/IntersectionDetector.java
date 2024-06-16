@@ -5,8 +5,6 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.utils.Disposable;
 import com.ksabov.cbo.GameObjectCollection;
-import com.ksabov.cbo.TiledMapProjection;
-import org.w3c.dom.css.Rect;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;

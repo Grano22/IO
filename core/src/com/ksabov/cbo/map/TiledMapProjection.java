@@ -1,4 +1,4 @@
-package com.ksabov.cbo;
+package com.ksabov.cbo.map;
 
 import java.util.ArrayList;
 

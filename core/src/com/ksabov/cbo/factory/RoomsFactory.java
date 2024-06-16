@@ -18,24 +18,45 @@ public class RoomsFactory {
         System.out.println(cornerMarkers);
         System.out.println(cornerMarkers.size());
 
-        for (int i = 0; i < cornerMarkers.size() - 1; i++) {
-//            System.out.println(cornerMarkers.get(i + 1).x - cornerMarkers.get(i).x);
-//            System.out.println(cornerMarkers.get(i + 1).y - cornerMarkers.get(i).y);
+        int howFirstDimension = 0;
 
-            rooms.add(
-                new Room(
-                    "room" + i,
-                        cornerMarkers.get(i),
-                        cornerMarkers.get(i + 1).x - cornerMarkers.get(i).x,
-                        cornerMarkers.get(i + 1).y - cornerMarkers.get(i).y
+        while (cornerMarkers.get(howFirstDimension).x == 0.) {
+            howFirstDimension++;
+        }
+
+        int howMuchShards = cornerMarkers.size() / howFirstDimension;
+
+        System.out.println(howFirstDimension);
+        System.out.println(howMuchShards);
+
+        for (int i = 0; i < howMuchShards - 1; i++) {
+            for (int j = 0; j < howFirstDimension - 1; j++) {
+                int iter = (i * howFirstDimension) + j;
+                Vector2 nextDimCorner = cornerMarkers.get((i + 1) * howFirstDimension + j);
+                float roomWidth = nextDimCorner.x - cornerMarkers.get(iter).x;
+                float roomHeight = cornerMarkers.get(iter + 1).y - cornerMarkers.get(iter).y;
+
+//                System.out.println(nextDimCorner);
+//                System.out.println(cornerMarkers.get(iter + 1));
+//                System.out.println(cornerMarkers.get(iter));
+//                System.out.println(roomWidth);
+//                System.out.println(roomHeight);
+
+                rooms.add(
+                        new Room(
+                                "room" + i,
+                                cornerMarkers.get(iter),
+                                roomWidth,
+                                roomHeight
 //                     new ArrayList<Wall>() {{
 //                         add(new Wall(finalNextX, finalNextY + definition.tileSize(), definition.tileSize(), nextWallHeight));
 //                         add(new Wall(finalNextX, finalNextY, nextWallWidth, definition.tileSize()));
 //                         add(new Wall(finalNextX + nextWallHeight, finalNextY, definition.tileSize(), nextWallHeight));
 //                         add(new Wall(finalNextX, finalNextY + nextWallHeight + definition.tileSize(), nextWallWidth, definition.tileSize()));
 //                     }}
-                )
-            );
+                        )
+                );
+            }
         }
 
         return rooms;

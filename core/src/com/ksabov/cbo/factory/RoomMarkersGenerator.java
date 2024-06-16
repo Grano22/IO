@@ -1,9 +1,7 @@
 package com.ksabov.cbo.factory;
 
 import com.badlogic.gdx.math.Vector2;
-import com.ksabov.cbo.Room;
-import com.ksabov.cbo.TiledMapProjection;
-import com.ksabov.cbo.objects.Wall;
+import com.ksabov.cbo.map.TiledMapProjection;
 
 import java.util.ArrayList;
 import java.util.Random;

@@ -2,16 +2,20 @@ package com.ksabov.cbo.factory;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.ksabov.cbo.GameAssetsManager;
-import com.ksabov.cbo.TiledMapProjection;
+import com.ksabov.cbo.map.TileFromMarkerMask;
+import com.ksabov.cbo.map.TiledMapProjection;
 
 public class MapFromProjectionFactory {
-    private GameAssetsManager gameAssetsManager;
+    private final GameAssetsManager gameAssetsManager;
+    private final TileFromMarkerMask tileFromMarkerMask;
 
-    public MapFromProjectionFactory(GameAssetsManager gameAssetsManager) {
+    public MapFromProjectionFactory(GameAssetsManager gameAssetsManager, TileFromMarkerMask tileFromMarkerMask) {
         this.gameAssetsManager = gameAssetsManager;
+        this.tileFromMarkerMask = tileFromMarkerMask;
     }
 
     public TiledMap create(TiledMapProjection projection) {
@@ -24,9 +28,8 @@ public class MapFromProjectionFactory {
             for (int x = 0; x < projection.getWidth(); x++) {
                 for (int y = 0; y < projection.getHeight(); y++) {
                     TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
-                    TextureRegion textureRegionForTile = gameAssetsManager.getMapTextureRegion(markers[x][y]);
-                    textureRegionForTile.setRegion(0, 0, projection.getTileSize(), projection.getTileSize());
-                    cell.setTile(new StaticTiledMapTile(textureRegionForTile));
+                    TiledMapTile nextCreatedTile = tileFromMarkerMask.create(markers[x][y], projection.getTileSize());
+                    cell.setTile(nextCreatedTile);
                     layer.setCell(x, y, cell);
                 }
             }

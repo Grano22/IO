@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -23,10 +24,13 @@ import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.ksabov.cbo.behaviour.IntersectionDetector;
 import com.ksabov.cbo.behaviour.Intersectional;
+import com.ksabov.cbo.behaviour.TiledMapIntersectionDetector;
 import com.ksabov.cbo.behaviour.UserControlReagent;
 import com.ksabov.cbo.factory.*;
 import com.ksabov.cbo.helper.ConsoleDebugger;
 import com.ksabov.cbo.helper.TiledMapHelper;
+import com.ksabov.cbo.map.TileFromMarkerMask;
+import com.ksabov.cbo.map.TiledMapProjection;
 import com.ksabov.cbo.objects.MetaPoint;
 import com.ksabov.cbo.objects.Wall;
 
@@ -43,10 +47,12 @@ public class PlayAreaScreen extends BaseScreen {
     Rectangle bucket;
     Random generator = new Random();
     TiledMapProjection mapProjection;
-    MapProjectionFactory mapProjectionFactory;
-    MapFromProjectionFactory mapFromProjectionFactory;
+    final MapProjectionFactory mapProjectionFactory;
+    final TileFromMarkerMask tileFromMarkerMask;
+    final MapFromProjectionFactory mapFromProjectionFactory;
     final RoomMarkersGenerator roomMarkersGenerator;
     final TiledMapHelper tiledMapHelper;
+    final TiledMapIntersectionDetector tiledMapIntersectionDetector;
 
     private final RenderingMiddlewareManager renderingMiddlewareManager;
 
@@ -85,9 +91,11 @@ public class PlayAreaScreen extends BaseScreen {
         mapGenerationDefinition = new MapGenerationDefinition(70, 70, 40);
         renderingMiddlewareManager = new RenderingMiddlewareManager();
         mapProjectionFactory = new MapProjectionFactory();
-        mapFromProjectionFactory = new MapFromProjectionFactory(game.gameAssetsManager);
+        tileFromMarkerMask = new TileFromMarkerMask(game.gameAssetsManager);
+        mapFromProjectionFactory = new MapFromProjectionFactory(game.gameAssetsManager, tileFromMarkerMask);
         roomMarkersGenerator = new RoomMarkersGenerator();
         tiledMapHelper = new TiledMapHelper();
+        tiledMapIntersectionDetector = new TiledMapIntersectionDetector(tiledMapHelper);
 
         // Game objects
         gameObjects = new GameObjectCollection();
@@ -180,36 +188,43 @@ public class PlayAreaScreen extends BaseScreen {
     public void show() {
     }
 
+    private boolean willCollide(MoveToAction nextMove) {
+        return tiledMapIntersectionDetector.getNextExactStep(mapProjection, currentMap, nextMove, TileFromMarkerMask.blockingProperty).isPresent();
+    }
+
     private void handleMovement() {
         MoveToAction moveAction = new MoveToAction();
         moveAction.setStartPosition(player.getX(), player.getY());
         moveAction.setPosition(player.getX(), player.getY());
         final float nextMoveSpeed = Player.MOVEMENT_SPEED * Gdx.graphics.getDeltaTime();
 
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.A) && !willCollide(new MoveToAction() {{ setPosition(moveAction.getX() - nextMoveSpeed, moveAction.getY()); setStartPosition(moveAction.getStartX(), moveAction.getStartY()); }})) {
             //player.setX(player.getX() - nextMoveSpeed);
             moveAction.setX(moveAction.getX() - nextMoveSpeed);
-            AbstractMap.SimpleImmutableEntry<Integer, Integer> nextCods = tiledMapHelper.getTileCordsByCharacterPosition(mapProjection, player);
-            //System.out.println();
+            //AbstractMap.SimpleImmutableEntry<Integer, Integer> nextCods = tiledMapHelper.getTileIndexesByCharacterPosition(mapProjection, player);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.D) && !willCollide(new MoveToAction() {{ setPosition(moveAction.getX() + nextMoveSpeed, moveAction.getY()); setStartPosition(moveAction.getStartX(), moveAction.getStartY()); }})) {
             //player.setX(player.getX() + nextMoveSpeed);
             moveAction.setX(moveAction.getX() + nextMoveSpeed);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.W) && !willCollide(new MoveToAction() {{ setPosition(moveAction.getX(), moveAction.getY() + nextMoveSpeed); setStartPosition(moveAction.getStartX(), moveAction.getStartY()); }})) {
             //player.setY(player.getY() + nextMoveSpeed);
             moveAction.setY(moveAction.getY() + nextMoveSpeed);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.S) && !willCollide(new MoveToAction() {{ setPosition(moveAction.getX(), moveAction.getY() - nextMoveSpeed); setStartPosition(moveAction.getStartX(), moveAction.getStartY()); }})) {
             //player.setY(player.getY() - nextMoveSpeed);
             moveAction.setY(moveAction.getY() - nextMoveSpeed);
         }
-
-        actions.put(player, moveAction);
         //actionsQue.add(moveAction);
+
+        Optional<TiledMapTile> nextBlockingTile = tiledMapIntersectionDetector.getNextExactStep(mapProjection, currentMap, moveAction, TileFromMarkerMask.blockingProperty);
+        if (nextBlockingTile.isPresent()) {
+            System.out.println("Intersecting map blocking tile...");
+            //moveAction.setPosition(nextBlockingTile.get().getOffsetX(), nextBlockingTile.get().getOffsetY());
+        }
 
         Intersectional intersectionObj = intersectionDetector.willIntersectWith(player, moveAction);
         if (intersectionObj != null) {
@@ -217,6 +232,7 @@ public class PlayAreaScreen extends BaseScreen {
             //return;
         }
 
+        actions.put(player, moveAction);
         player.setPosition(moveAction.getX(), moveAction.getY());
     }
 
@@ -299,7 +315,10 @@ public class PlayAreaScreen extends BaseScreen {
         if (finalObjective.isHit()) {
             System.out.println("dssdsds");
             finalObjective.setHit(false);
-            //FIXME: bugged gameObjects = parepareMap(w, h);
+            dispose();
+            finishLevel();
+            //FIXME: bugged
+            prepareMap(w, h);
         }
 
         handleDebug();
