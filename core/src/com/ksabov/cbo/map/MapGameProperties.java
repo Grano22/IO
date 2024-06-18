@@ -1,7 +1,9 @@
 package com.ksabov.cbo.map;
 
 public enum MapGameProperties {
-    BLOCKING("BLOCKING");
+    BLOCKING("BLOCKING"),
+    POSITION_X("POSITION_X"),
+    POSITION_Y("POSITION_Y");
 
     private final String text;
 

@@ -6,6 +6,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.ksabov.cbo.GameAssetsManager;
+import com.ksabov.cbo.map.MapGameProperties;
 import com.ksabov.cbo.map.TileFromMarkerMask;
 import com.ksabov.cbo.map.TiledMapProjection;
 
@@ -29,6 +30,8 @@ public class MapFromProjectionFactory {
                 for (int y = 0; y < projection.getHeight(); y++) {
                     TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
                     TiledMapTile nextCreatedTile = tileFromMarkerMask.create(markers[x][y], projection.getTileSize());
+                    nextCreatedTile.getProperties().put(MapGameProperties.POSITION_X.toString(), (float)x * projection.getTileSize());
+                    nextCreatedTile.getProperties().put(MapGameProperties.POSITION_Y.toString(), (float)y * projection.getTileSize());
                     cell.setTile(nextCreatedTile);
                     layer.setCell(x, y, cell);
                 }

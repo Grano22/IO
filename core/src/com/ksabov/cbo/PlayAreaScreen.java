@@ -13,6 +13,7 @@ import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -21,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.ksabov.cbo.behaviour.IntersectionDetector;
 import com.ksabov.cbo.behaviour.Intersectional;
@@ -29,6 +31,7 @@ import com.ksabov.cbo.behaviour.UserControlReagent;
 import com.ksabov.cbo.factory.*;
 import com.ksabov.cbo.helper.ConsoleDebugger;
 import com.ksabov.cbo.helper.TiledMapHelper;
+import com.ksabov.cbo.map.MapGameProperties;
 import com.ksabov.cbo.map.TileFromMarkerMask;
 import com.ksabov.cbo.map.TiledMapProjection;
 import com.ksabov.cbo.objects.MetaPoint;
@@ -198,32 +201,36 @@ public class PlayAreaScreen extends BaseScreen {
         moveAction.setPosition(player.getX(), player.getY());
         final float nextMoveSpeed = Player.MOVEMENT_SPEED * Gdx.graphics.getDeltaTime();
 
-        if (Gdx.input.isKeyPressed(Input.Keys.A) && !willCollide(new MoveToAction() {{ setPosition(moveAction.getX() - nextMoveSpeed, moveAction.getY()); setStartPosition(moveAction.getStartX(), moveAction.getStartY()); }})) {
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             //player.setX(player.getX() - nextMoveSpeed);
             moveAction.setX(moveAction.getX() - nextMoveSpeed);
             //AbstractMap.SimpleImmutableEntry<Integer, Integer> nextCods = tiledMapHelper.getTileIndexesByCharacterPosition(mapProjection, player);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.D) && !willCollide(new MoveToAction() {{ setPosition(moveAction.getX() + nextMoveSpeed, moveAction.getY()); setStartPosition(moveAction.getStartX(), moveAction.getStartY()); }})) {
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             //player.setX(player.getX() + nextMoveSpeed);
             moveAction.setX(moveAction.getX() + nextMoveSpeed);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.W) && !willCollide(new MoveToAction() {{ setPosition(moveAction.getX(), moveAction.getY() + nextMoveSpeed); setStartPosition(moveAction.getStartX(), moveAction.getStartY()); }})) {
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             //player.setY(player.getY() + nextMoveSpeed);
             moveAction.setY(moveAction.getY() + nextMoveSpeed);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.S) && !willCollide(new MoveToAction() {{ setPosition(moveAction.getX(), moveAction.getY() - nextMoveSpeed); setStartPosition(moveAction.getStartX(), moveAction.getStartY()); }})) {
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             //player.setY(player.getY() - nextMoveSpeed);
             moveAction.setY(moveAction.getY() - nextMoveSpeed);
         }
         //actionsQue.add(moveAction);
 
-        Optional<TiledMapTile> nextBlockingTile = tiledMapIntersectionDetector.getNextExactStep(mapProjection, currentMap, moveAction, TileFromMarkerMask.blockingProperty);
-        if (nextBlockingTile.isPresent()) {
-            System.out.println("Intersecting map blocking tile...");
-            //moveAction.setPosition(nextBlockingTile.get().getOffsetX(), nextBlockingTile.get().getOffsetY());
+        ArrayList<ArrayList<TiledMapTile>> meetTiles = tiledMapIntersectionDetector.willStayOn(mapProjection, currentMap, moveAction);
+
+        if (!meetTiles.get(1).isEmpty()) {
+            TiledMapTile lastBlockingTile = meetTiles.get(1).get(meetTiles.get(1).size() - 1);
+            moveAction.setPosition(
+                  (Float)lastBlockingTile.getProperties().get(MapGameProperties.POSITION_X.toString()),
+                  (Float)lastBlockingTile.getProperties().get(MapGameProperties.POSITION_Y.toString())
+            );
         }
 
         Intersectional intersectionObj = intersectionDetector.willIntersectWith(player, moveAction);
