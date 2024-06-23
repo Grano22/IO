@@ -62,7 +62,10 @@ public class TiledMapIntersectionDetector {
                     Optional<TiledMapTileLayer.Cell> nextCell = Optional.ofNullable(decidableLayer.getCell(nextCords.getKey(), nextCords.getValue()));
 
                     if (!nextCell.isPresent()) {
-                        break;
+                        nextPosX += (Math.abs(targetX - nextPosX) < tiledMapProjection.getTileSize() ? Math.abs(targetX - nextPosX) : deltaX) * directionX;
+                        nextPosY += (Math.abs(targetY - nextPosY) < tiledMapProjection.getTileSize() ? Math.abs(targetY - nextPosY) : deltaY) * directionY;
+
+                        continue;
                     }
 
                     Optional<TiledMapTile> nextTile = Optional.ofNullable(nextCell.get().getTile());
@@ -71,12 +74,12 @@ public class TiledMapIntersectionDetector {
                         break;
                     }
 
+                    meetLayerTiles.add(nextTile.get());
+
                     Optional<Object> isBlocker = Optional.ofNullable(nextTile.get().getProperties().get(MapGameProperties.BLOCKING.toString()));
                     if (isBlocker.isPresent() && isBlocker.get().equals(true)) {
                         break;
                     }
-
-                    meetLayerTiles.add(nextTile.get());
 
                     nextPosX += (Math.abs(targetX - nextPosX) < tiledMapProjection.getTileSize() ? Math.abs(targetX - nextPosX) : deltaX) * directionX;
                     nextPosY += (Math.abs(targetY - nextPosY) < tiledMapProjection.getTileSize() ? Math.abs(targetY - nextPosY) : deltaY) * directionY;

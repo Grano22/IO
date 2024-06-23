@@ -28,6 +28,10 @@ public class MapFromProjectionFactory {
 
             for (int x = 0; x < projection.getWidth(); x++) {
                 for (int y = 0; y < projection.getHeight(); y++) {
+                    if (markers[x][y] == TiledMapProjection.MARKER_NONE) {
+                        continue;
+                    }
+
                     TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
                     TiledMapTile nextCreatedTile = tileFromMarkerMask.create(markers[x][y], projection.getTileSize());
                     nextCreatedTile.getProperties().put(MapGameProperties.POSITION_X.toString(), (float)x * projection.getTileSize());

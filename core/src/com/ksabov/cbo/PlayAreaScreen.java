@@ -30,6 +30,7 @@ import com.ksabov.cbo.behaviour.TiledMapIntersectionDetector;
 import com.ksabov.cbo.behaviour.UserControlReagent;
 import com.ksabov.cbo.factory.*;
 import com.ksabov.cbo.helper.ConsoleDebugger;
+import com.ksabov.cbo.helper.MatrixDebugger;
 import com.ksabov.cbo.helper.TiledMapHelper;
 import com.ksabov.cbo.map.MapGameProperties;
 import com.ksabov.cbo.map.TileFromMarkerMask;
@@ -133,7 +134,12 @@ public class PlayAreaScreen extends BaseScreen {
         currentMap = mapFromProjectionFactory.create(mapProjection);
 
 
-        //MatrixDebugger.printMarkers(mapProjection.getRawMatrixMarkersLayer(0));
+//        System.out.println("Floor layer =============================================");
+//        MatrixDebugger.printMarkers(mapProjection.getRawMatrixMarkersLayer(0));
+//        System.out.println("Wall layer =============================================");
+//        MatrixDebugger.printMarkers(mapProjection.getRawMatrixMarkersLayer(1));
+//        System.out.println("Items layer =============================================");
+//        MatrixDebugger.printMarkers(mapProjection.getRawMatrixMarkersLayer(2));
 
         //currentMap.getLayers().add(roomsLayers);
 
@@ -206,11 +212,10 @@ public class PlayAreaScreen extends BaseScreen {
 
         if (!meetTiles.get(1).isEmpty()) {
             TiledMapTile lastBlockingTile = meetTiles.get(1).get(meetTiles.get(1).size() - 1);
-            moveAction.setPosition(
-                  (Float)lastBlockingTile.getProperties().get(MapGameProperties.POSITION_X.toString()),
-                  (Float)lastBlockingTile.getProperties().get(MapGameProperties.POSITION_Y.toString())
-            );
+            Vector2 nextCollidedPosition = calculateCollisionPosition(moveAction, lastBlockingTile);
+            moveAction.setPosition(nextCollidedPosition.x, nextCollidedPosition.y);
         }
+        System.out.println(meetTiles.get(1));
 
         Intersectional intersectionObj = intersectionDetector.willIntersectWith(player, moveAction);
         if (intersectionObj != null) {
@@ -220,6 +225,22 @@ public class PlayAreaScreen extends BaseScreen {
 
         actions.put(player, moveAction);
         player.setPosition(moveAction.getX(), moveAction.getY());
+    }
+
+    private Vector2 calculateCollisionPosition(MoveToAction nextMove, TiledMapTile lastBlockingTile) {
+        float blockingElX = (Float)lastBlockingTile.getProperties().get(MapGameProperties.POSITION_X.toString());
+        float blockingElY = (Float)lastBlockingTile.getProperties().get(MapGameProperties.POSITION_Y.toString());
+        Vector2 nextPos = new Vector2(blockingElX - player.getWidth(), blockingElY - player.getHeight());
+
+        if (nextMove.getStartX() > blockingElX) {
+            nextPos.set(blockingElX + player.getWidth(), nextPos.y);
+        }
+
+        if (nextMove.getStartY() > blockingElY) {
+            nextPos.set(nextPos.x, blockingElY + player.getHeight());
+        }
+
+        return nextPos;
     }
 
     private void handleDebug() {

@@ -1,14 +1,16 @@
 package com.ksabov.cbo.map;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class TiledMapProjection implements Cloneable {
-    final static public int MARKER_NEUTRAL_FLOOR = 0;
-    final static public int MARKER_WALL = 1;
-    final static public int MARKER_ROOM = 2;
-    final static public int MARKER_ROOM_WALL_CORNER = 3;
-    final static public int MARKER_OPEN_DOOR = 4;
-    final static public int MARKER_CLOSED_DOOR = 5;
+    final static public int MARKER_NONE = 0;
+    final static public int MARKER_NEUTRAL_FLOOR = 1;
+    final static public int MARKER_WALL = 2;
+    final static public int MARKER_ROOM = 3;
+    final static public int MARKER_ROOM_WALL_CORNER = 4;
+    final static public int MARKER_OPEN_DOOR = 5;
+    final static public int MARKER_CLOSED_DOOR = 6;
 
     private final ArrayList<int[][]> markerLayers;
     private final int sizeX;
@@ -17,6 +19,7 @@ public class TiledMapProjection implements Cloneable {
 
     public TiledMapProjection(int width, int height, int tileSize) {
         markerLayers = new ArrayList<int[][]>() {{ add(new int[width][height]); }};
+        Arrays.stream(markerLayers.get(0)).forEach(a -> Arrays.fill(a, 1));
         sizeX = width;
         sizeXY = height;
         this.tileSize = tileSize;

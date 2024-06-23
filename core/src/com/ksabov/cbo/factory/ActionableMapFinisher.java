@@ -9,7 +9,7 @@ import java.util.Random;
 
 public class ActionableMapFinisher {
     public TiledMapProjection finish(TiledMapProjection baseProjection, ArrayList<Room> rooms) {
-        int[][] wallLayers = baseProjection.getRawMatrixMarkersLayer(1);
+        //int[][] wallLayers = baseProjection.getRawMatrixMarkersLayer(1);
         // Generate doors
         Random random = new Random();
         int[][] nextMarkers = new int[baseProjection.getWidth()][baseProjection.getHeight()];
@@ -44,7 +44,7 @@ public class ActionableMapFinisher {
 //            }
         }
 
-        //baseProjection.setRawMatrixMarkersLayer(2, nextMarkers);
+        baseProjection.setRawMatrixMarkersLayer(2, nextMarkers);
 
         return baseProjection;
     }
