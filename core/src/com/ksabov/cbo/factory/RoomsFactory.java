@@ -15,9 +15,6 @@ public class RoomsFactory {
     {
         ArrayList<Room> rooms = new ArrayList<>();
 
-        System.out.println(cornerMarkers);
-        System.out.println(cornerMarkers.size());
-
         int howFirstDimension = 0;
 
         while (cornerMarkers.get(howFirstDimension).x == 0.) {
@@ -26,21 +23,12 @@ public class RoomsFactory {
 
         int howMuchShards = cornerMarkers.size() / howFirstDimension;
 
-        System.out.println(howFirstDimension);
-        System.out.println(howMuchShards);
-
         for (int i = 0; i < howMuchShards - 1; i++) {
             for (int j = 0; j < howFirstDimension - 1; j++) {
                 int iter = (i * howFirstDimension) + j;
                 Vector2 nextDimCorner = cornerMarkers.get((i + 1) * howFirstDimension + j);
                 float roomWidth = nextDimCorner.x - cornerMarkers.get(iter).x;
                 float roomHeight = cornerMarkers.get(iter + 1).y - cornerMarkers.get(iter).y;
-
-//                System.out.println(nextDimCorner);
-//                System.out.println(cornerMarkers.get(iter + 1));
-//                System.out.println(cornerMarkers.get(iter));
-//                System.out.println(roomWidth);
-//                System.out.println(roomHeight);
 
                 rooms.add(
                         new Room(

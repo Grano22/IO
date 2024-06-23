@@ -8,15 +8,31 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 public class Room {
-    final String name;
-    final Vector2 position;
-    final float width;
-    final float height;
+    final private String name;
+    final private Vector2 position;
+    final private float width;
+    final private float height;
 
     public Room(String name, Vector2 position, float width, float height) {
         this.name = name;
         this.position = position;
         this.width = width;
         this.height = height;
+    }
+
+    public float getHeight() {
+        return height;
+    }
+
+    public float getWidth() {
+        return width;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Vector2 getPosition() {
+        return position;
     }
 }

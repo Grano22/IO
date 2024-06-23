@@ -2,11 +2,13 @@ package com.ksabov.cbo.map;
 
 import java.util.ArrayList;
 
-public class TiledMapProjection {
+public class TiledMapProjection implements Cloneable {
     final static public int MARKER_NEUTRAL_FLOOR = 0;
     final static public int MARKER_WALL = 1;
     final static public int MARKER_ROOM = 2;
     final static public int MARKER_ROOM_WALL_CORNER = 3;
+    final static public int MARKER_OPEN_DOOR = 4;
+    final static public int MARKER_CLOSED_DOOR = 5;
 
     private final ArrayList<int[][]> markerLayers;
     private final int sizeX;
@@ -19,6 +21,10 @@ public class TiledMapProjection {
         sizeXY = height;
         this.tileSize = tileSize;
     }
+//
+//    public TiledMapProjection(TiledMapProjection that) {
+//        this();
+//    }
 
     public int[][] getRawMatrixMarkersLayer(int layerId) {
         return markerLayers.get(layerId);
@@ -50,5 +56,14 @@ public class TiledMapProjection {
 
     public int getMarkersLayersCount() {
         return markerLayers.size();
+    }
+
+    @Override
+    public TiledMapProjection clone() {
+        try {
+            return (TiledMapProjection)super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

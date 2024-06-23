@@ -74,6 +74,11 @@ public class GameAssetsManager {
 
         mapTextureRegions.put(TiledMapProjection.MARKER_WALL, wallRegion);
         mapTextureRegions.put(TiledMapProjection.MARKER_ROOM_WALL_CORNER, dustWallRegion);
+
+        Texture doorTexture = new Texture("arrow_up_debug.png");
+        TextureRegion doorDebugRegion = new TextureRegion(doorTexture);
+        mapTextureRegions.put(TiledMapProjection.MARKER_OPEN_DOOR, doorDebugRegion);
+        mapTextureRegions.put(TiledMapProjection.MARKER_CLOSED_DOOR, doorDebugRegion);
     }
 
     public TextureRegion getMapTextureRegion(int kind) {

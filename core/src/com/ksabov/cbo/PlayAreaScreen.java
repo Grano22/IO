@@ -66,6 +66,7 @@ public class PlayAreaScreen extends BaseScreen {
     // Map
     private TiledMap currentMap;
     private final RoomsFactory roomsFactory = new RoomsFactory();
+    private final ActionableMapFinisher actionableMapFinisher = new ActionableMapFinisher();
     private final Map<String, Room> rooms = new HashMap<>();
     private OrthogonalTiledMapRenderer gameMapRenderer;
 
@@ -125,30 +126,17 @@ public class PlayAreaScreen extends BaseScreen {
         mapProjection = mapProjectionFactory.create(mapGenerationDefinition);
 
         // Map
-//        MapLayer roomsLayers = new MapLayer();
-
-//        newRooms.forEach(room -> {
-//            room.walls.forEach(wall -> {
-//                gameObjects.add(wall.getName(), wall);
-//                roomsLayers.getObjects().add(new MapActor(wall));
-//            });
-//        });
-
-        //gameMapRenderer = new GameMapRenderer();
         ArrayList<Vector2> roomsMarkers = roomMarkersGenerator.generate(mapProjection);
-        currentMap = mapFromProjectionFactory.create(mapProjection);
         ArrayList<Room> generatedRooms = roomsFactory.create(roomsMarkers);
+
+        mapProjection = actionableMapFinisher.finish(mapProjection, generatedRooms);
+        currentMap = mapFromProjectionFactory.create(mapProjection);
+
+
         //MatrixDebugger.printMarkers(mapProjection.getRawMatrixMarkersLayer(0));
 
         //currentMap.getLayers().add(roomsLayers);
 
-//        ArrayList<Wall> boundaryWalls = MapBoundariesFactory.createMapBoundaries(0, 0, mapGenerationDefinition.mapWidth(), mapGenerationDefinition.mapHeight());
-//        MapLayer boundaryWallsLayer = new MapLayer();
-//        boundaryWalls.forEach(wall -> {
-//            boundaryWallsLayer.getObjects().add(new MapActor(wall));
-//            gameObjects.add(wall.getName(), wall);
-//        });
-        //currentMap.getLayers().add(boundaryWallsLayer);
         MapLayer objectsLayer = new MapLayer();
         //currentMap.getLayers().add(layerOfWalls);
         currentMap.getLayers().add(objectsLayer);
@@ -191,10 +179,6 @@ public class PlayAreaScreen extends BaseScreen {
     public void show() {
     }
 
-    private boolean willCollide(MoveToAction nextMove) {
-        return tiledMapIntersectionDetector.getNextExactStep(mapProjection, currentMap, nextMove, TileFromMarkerMask.blockingProperty).isPresent();
-    }
-
     private void handleMovement() {
         MoveToAction moveAction = new MoveToAction();
         moveAction.setStartPosition(player.getX(), player.getY());
@@ -202,23 +186,18 @@ public class PlayAreaScreen extends BaseScreen {
         final float nextMoveSpeed = Player.MOVEMENT_SPEED * Gdx.graphics.getDeltaTime();
 
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            //player.setX(player.getX() - nextMoveSpeed);
             moveAction.setX(moveAction.getX() - nextMoveSpeed);
-            //AbstractMap.SimpleImmutableEntry<Integer, Integer> nextCods = tiledMapHelper.getTileIndexesByCharacterPosition(mapProjection, player);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            //player.setX(player.getX() + nextMoveSpeed);
             moveAction.setX(moveAction.getX() + nextMoveSpeed);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            //player.setY(player.getY() + nextMoveSpeed);
             moveAction.setY(moveAction.getY() + nextMoveSpeed);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            //player.setY(player.getY() - nextMoveSpeed);
             moveAction.setY(moveAction.getY() - nextMoveSpeed);
         }
         //actionsQue.add(moveAction);
@@ -241,21 +220,6 @@ public class PlayAreaScreen extends BaseScreen {
 
         actions.put(player, moveAction);
         player.setPosition(moveAction.getX(), moveAction.getY());
-    }
-
-    private boolean handleCollision(float posX, float posY) {
-        for (Actor renderedActor: group.getChildren()) {
-            if (!(renderedActor instanceof Player)) {
-                Rectangle playerCollision = new Rectangle(Math.abs(posX + 10), Math.abs(posY - 10), player.getWidth() - 10, player.getHeight() - 10);
-                Rectangle objectCollision = new Rectangle(Math.abs(renderedActor.getX()), Math.abs(renderedActor.getY()), renderedActor.getWidth(), renderedActor.getHeight());
-                if (renderedActor instanceof Wall && playerCollision.overlaps(objectCollision)) {
-                    //System.out.println(renderedActor.getClass().getName());
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 
     private void handleDebug() {

@@ -78,9 +78,7 @@ public class TiledMapIntersectionDetector {
 
                     meetLayerTiles.add(nextTile.get());
 
-                    //nextPosX += moveToAction.getX() - nextPosX < tiledMapProjection.getTileSize() ? moveToAction.getX() - nextPosX : tiledMapProjection.getTileSize();
                     nextPosX += (Math.abs(targetX - nextPosX) < tiledMapProjection.getTileSize() ? Math.abs(targetX - nextPosX) : deltaX) * directionX;
-                    //nextPosY += moveToAction.getX() - nextPosY < tiledMapProjection.getTileSize() ? moveToAction.getY() - nextPosY : tiledMapProjection.getTileSize();
                     nextPosY += (Math.abs(targetY - nextPosY) < tiledMapProjection.getTileSize() ? Math.abs(targetY - nextPosY) : deltaY) * directionY;
                 }
             }
