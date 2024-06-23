@@ -44,7 +44,19 @@ public class TiledMapIntersectionDetector {
                 ArrayList<TiledMapTile> meetLayerTiles = new ArrayList<>();
                 meetTiles.add(meetLayerTiles);
                 float nextPosX = moveToAction.getStartX(), nextPosY = moveToAction.getStartY();
-                while (nextPosX < moveToAction.getX() || nextPosY < moveToAction.getY()) {
+                float targetX = moveToAction.getX(), targetY = moveToAction.getY();
+                float deltaX = tiledMapProjection.getTileSize(), deltaY = tiledMapProjection.getTileSize();
+                float directionX = 1; float directionY = 1;
+
+                if (moveToAction.getStartX() > moveToAction.getX()) {
+                    directionX *= -1;
+                }
+
+                if (moveToAction.getStartY() > moveToAction.getY()) {
+                    directionY *= -1;
+                }
+
+                while (Math.abs(targetX - nextPosX) > 0 || Math.abs(targetY - nextPosY) > 0) {
                     TiledMapTileLayer decidableLayer = (TiledMapTileLayer) mapLayer;
                     SimpleImmutableEntry<Integer, Integer> nextCords = tiledMapHelper.getTileIndexesByCords(tiledMapProjection, nextPosX, nextPosY);
                     Optional<TiledMapTileLayer.Cell> nextCell = Optional.ofNullable(decidableLayer.getCell(nextCords.getKey(), nextCords.getValue()));
@@ -67,9 +79,9 @@ public class TiledMapIntersectionDetector {
                     meetLayerTiles.add(nextTile.get());
 
                     //nextPosX += moveToAction.getX() - nextPosX < tiledMapProjection.getTileSize() ? moveToAction.getX() - nextPosX : tiledMapProjection.getTileSize();
-                    nextPosX += moveToAction.getX() - nextPosX < tiledMapProjection.getTileSize() ? moveToAction.getX() - nextPosX : tiledMapProjection.getTileSize();
+                    nextPosX += (Math.abs(targetX - nextPosX) < tiledMapProjection.getTileSize() ? Math.abs(targetX - nextPosX) : deltaX) * directionX;
                     //nextPosY += moveToAction.getX() - nextPosY < tiledMapProjection.getTileSize() ? moveToAction.getY() - nextPosY : tiledMapProjection.getTileSize();
-                    nextPosY += moveToAction.getX() - nextPosY < tiledMapProjection.getTileSize() ? moveToAction.getY() - nextPosY : tiledMapProjection.getTileSize();
+                    nextPosY += (Math.abs(targetY - nextPosY) < tiledMapProjection.getTileSize() ? Math.abs(targetY - nextPosY) : deltaY) * directionY;
                 }
             }
         }
