@@ -186,36 +186,50 @@ public class PlayAreaScreen extends BaseScreen {
     }
 
     private void handleMovement() {
+        if (player.isRunning()) {
+            System.out.println("tezt");
+            return;
+        }
+
+        player.updateState(Player.State.RUNNING);
+
         MoveToAction moveAction = new MoveToAction();
         moveAction.setStartPosition(player.getX(), player.getY());
         moveAction.setPosition(player.getX(), player.getY());
         final float nextMoveSpeed = Player.MOVEMENT_SPEED * Gdx.graphics.getDeltaTime();
+        boolean aIsPressed = Gdx.input.isKeyPressed(Input.Keys.A);
+        boolean dIsPressed = Gdx.input.isKeyPressed(Input.Keys.D);
+        boolean wIsPressed = Gdx.input.isKeyPressed(Input.Keys.W);
+        boolean sIsPressed = Gdx.input.isKeyPressed(Input.Keys.S);
 
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+        if (aIsPressed) {
             moveAction.setX(moveAction.getX() - nextMoveSpeed);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+        if (dIsPressed) {
             moveAction.setX(moveAction.getX() + nextMoveSpeed);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+        if (wIsPressed) {
             moveAction.setY(moveAction.getY() + nextMoveSpeed);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+        if (sIsPressed) {
             moveAction.setY(moveAction.getY() - nextMoveSpeed);
         }
         //actionsQue.add(moveAction);
 
-        ArrayList<ArrayList<TiledMapTile>> meetTiles = tiledMapIntersectionDetector.willStayOn(mapProjection, currentMap, moveAction);
+        ArrayList<ArrayList<VisitedTiledMapDetails>> meetTiles = tiledMapIntersectionDetector.willStayOn(mapProjection, currentMap, moveAction);
 
+        if (meetTiles.get(0).size() > 0) {
+            System.out.println(meetTiles.get(0).size());
+        }
         if (!meetTiles.get(1).isEmpty()) {
-            TiledMapTile lastBlockingTile = meetTiles.get(1).get(meetTiles.get(1).size() - 1);
-            Vector2 nextCollidedPosition = calculateCollisionPosition(moveAction, lastBlockingTile);
+            VisitedTiledMapDetails lastBlockingVisitedArea = meetTiles.get(1).get(meetTiles.get(1).size() - 1);
+            TiledMapTile lastBlockingTile = lastBlockingVisitedArea.getTile();
+            Vector2 nextCollidedPosition = calculateCollisionPosition(moveAction, lastBlockingVisitedArea);
             moveAction.setPosition(nextCollidedPosition.x, nextCollidedPosition.y);
         }
-        System.out.println(meetTiles.get(1));
 
         Intersectional intersectionObj = intersectionDetector.willIntersectWith(player, moveAction);
         if (intersectionObj != null) {
@@ -225,22 +239,76 @@ public class PlayAreaScreen extends BaseScreen {
 
         actions.put(player, moveAction);
         player.setPosition(moveAction.getX(), moveAction.getY());
+        player.updateState(Player.State.STAYING);
     }
 
-    private Vector2 calculateCollisionPosition(MoveToAction nextMove, TiledMapTile lastBlockingTile) {
-        float blockingElX = (Float)lastBlockingTile.getProperties().get(MapGameProperties.POSITION_X.toString());
-        float blockingElY = (Float)lastBlockingTile.getProperties().get(MapGameProperties.POSITION_Y.toString());
-        Vector2 nextPos = new Vector2(blockingElX - player.getWidth(), blockingElY - player.getHeight());
+    private Vector2 calculateCollisionPosition(MoveToAction nextMove, VisitedTiledMapDetails lastBlockingTile) {
+        float blockingElX = (Float)lastBlockingTile.getTile().getProperties().get(MapGameProperties.POSITION_X.toString());
+        float blockingElY = (Float)lastBlockingTile.getTile().getProperties().get(MapGameProperties.POSITION_Y.toString());
+        float fractionRate = 1;
+
+//        List<Optional<TiledMapTile>> listOfTiled = Arrays.asList(
+//            tiledMapHelper.getRightNeighbor(lastBlockingTile.getTile(), currentMap),
+//            tiledMapHelper.getBottomNeighbor(lastBlockingTile.getTile(), currentMap),
+//            tiledMapHelper.getLeftNeighbor(lastBlockingTile.getTile(), currentMap),
+//            tiledMapHelper.getTopNeighbor(lastBlockingTile.getTile(), currentMap)
+//        );
+
+//        long countOfNeighborWalls = listOfTiled.stream()
+//                .filter(Optional::isPresent)
+//                .count();
+
+        boolean[] listOfTiled = new boolean[]{
+                tiledMapHelper.getRightNeighbor(lastBlockingTile.getTile(), currentMap).isPresent(),
+                tiledMapHelper.getBottomNeighbor(lastBlockingTile.getTile(), currentMap).isPresent(),
+                tiledMapHelper.getLeftNeighbor(lastBlockingTile.getTile(), currentMap).isPresent(),
+                tiledMapHelper.getTopNeighbor(lastBlockingTile.getTile(), currentMap).isPresent()
+        };
+
+//        if (
+//             !Arrays.equals(listOfTiled, new boolean[]{true, false, false, false}) &&
+//             !Arrays.equals(listOfTiled, new boolean[]{false, true, false, true})
+//        ) {
+//            fractionRate = .5f;
+//            System.out.println("right neighbor detected");
+//        }
+        float angle = getAngle(new Vector2(nextMove.getStartX(), nextMove.getStartY()), new Vector2(nextMove.getX(), nextMove.getY()));
+
+        if (angle != 45) {
+            fractionRate = .5f;
+        }
+
+        Vector2 nextPos = new Vector2(blockingElX - player.getWidth() * fractionRate, blockingElY - player.getHeight());
 
         if (nextMove.getStartX() > blockingElX) {
-            nextPos.set(blockingElX + player.getWidth(), nextPos.y);
+            nextPos.set(blockingElX + mapProjection.getTileSize() * fractionRate, nextPos.y);
         }
 
         if (nextMove.getStartY() > blockingElY) {
-            nextPos.set(nextPos.x, blockingElY + player.getHeight());
+            nextPos.set(nextPos.x, blockingElY + mapProjection.getTileSize());
         }
 
+
+
+        //float slope = (nextMove.getStartX() - blockingElX)/(nextMove.getStartY() - blockingElY);
+        //System.out.println(slope);
+
+        System.out.println(angle);
+        //Vector2 nextPos = new Vector2(blockingElX - player.getWidth(), blockingElY - player.getHeight());
+
+
+
         return nextPos;
+    }
+
+    public float getAngle(Vector2 firstPoint, Vector2 secondPoint) {
+        float angle = (float) Math.toDegrees(Math.atan2(secondPoint.y - firstPoint.y, secondPoint.x - firstPoint.x));
+
+        if(angle < 0){
+            angle += 360;
+        }
+
+        return angle;
     }
 
     private void handleDebug() {
@@ -355,5 +423,6 @@ public class PlayAreaScreen extends BaseScreen {
         player.dispose();
         dropSound.dispose();
         rainMusic.dispose();
+        //gameCore.getBatch().dispose();
     }
 }

@@ -36,6 +36,7 @@ public class MapFromProjectionFactory {
                     TiledMapTile nextCreatedTile = tileFromMarkerMask.create(markers[x][y], projection.getTileSize());
                     nextCreatedTile.getProperties().put(MapGameProperties.POSITION_X.toString(), (float)x * projection.getTileSize());
                     nextCreatedTile.getProperties().put(MapGameProperties.POSITION_Y.toString(), (float)y * projection.getTileSize());
+                    nextCreatedTile.getProperties().put(MapGameProperties.LAYER_ID.toString(), layerId);
                     cell.setTile(nextCreatedTile);
                     layer.setCell(x, y, cell);
                 }

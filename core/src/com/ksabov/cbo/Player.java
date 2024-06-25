@@ -15,11 +15,12 @@ public class Player extends Actor implements Collidable {
     final static int MOVEMENT_SPEED = 800;
     final Rectangle boundingRect;
 
-    enum State {
+    public enum State {
+        STAYING,
         RUNNING
     }
 
-    State currentState = State.RUNNING;
+    State currentState = State.STAYING;
 
     public Player(Vector2 position, int width, int height) {
         super();
@@ -46,6 +47,13 @@ public class Player extends Actor implements Collidable {
     public void dispose() {
         skin.dispose();
     }
+
+    public void updateState(Player.State playerState) {
+        currentState = playerState;
+    }
+
+    public State getState() { return currentState; }
+    public boolean isRunning() { return currentState.name().equals(State.RUNNING.name()); }
 
     @Override
     public void setX(float x) {

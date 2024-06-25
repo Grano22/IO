@@ -5,6 +5,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
+import com.ksabov.cbo.VisitedTiledMapDetails;
 import com.ksabov.cbo.map.MapGameProperties;
 import com.ksabov.cbo.map.TiledMapProjection;
 import com.ksabov.cbo.helper.TiledMapHelper;
@@ -36,12 +37,12 @@ public class TiledMapIntersectionDetector {
         return Optional.of(targetTile);
     }
 
-    public ArrayList<ArrayList<TiledMapTile>> willStayOn(TiledMapProjection tiledMapProjection, TiledMap map, MoveToAction moveToAction) {
-        ArrayList<ArrayList<TiledMapTile>> meetTiles = new ArrayList<>();
+    public ArrayList<ArrayList<VisitedTiledMapDetails>> willStayOn(TiledMapProjection tiledMapProjection, TiledMap map, MoveToAction moveToAction) {
+        ArrayList<ArrayList<VisitedTiledMapDetails>> meetTiles = new ArrayList<>();
 
         for (MapLayer mapLayer : map.getLayers()) {
             if (mapLayer instanceof TiledMapTileLayer) {
-                ArrayList<TiledMapTile> meetLayerTiles = new ArrayList<>();
+                ArrayList<VisitedTiledMapDetails> meetLayerTiles = new ArrayList<>();
                 meetTiles.add(meetLayerTiles);
                 float nextPosX = moveToAction.getStartX(), nextPosY = moveToAction.getStartY();
                 float targetX = moveToAction.getX(), targetY = moveToAction.getY();
@@ -74,7 +75,13 @@ public class TiledMapIntersectionDetector {
                         break;
                     }
 
-                    meetLayerTiles.add(nextTile.get());
+                    TiledMapTile nextTileObj = nextTile.get();
+                    MoveToAction step = new MoveToAction();
+                    float nextTileX = (Float)nextTileObj.getProperties().get(MapGameProperties.POSITION_X.toString());
+                    float nextTileY = (Float)nextTileObj.getProperties().get(MapGameProperties.POSITION_Y.toString());
+                    step.setStartPosition(nextTileX, nextTileY);
+                    step.setPosition(moveToAction.getX() - nextTileX, moveToAction.getY() - nextTileY);
+                    meetLayerTiles.add(new VisitedTiledMapDetails(nextTileObj, step));
 
                     Optional<Object> isBlocker = Optional.ofNullable(nextTile.get().getProperties().get(MapGameProperties.BLOCKING.toString()));
                     if (isBlocker.isPresent() && isBlocker.get().equals(true)) {
