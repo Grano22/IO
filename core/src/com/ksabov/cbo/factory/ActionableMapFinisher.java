@@ -12,13 +12,13 @@ public class ActionableMapFinisher {
         //int[][] wallLayers = baseProjection.getRawMatrixMarkersLayer(1);
         // Generate doors
         Random random = new Random();
-        int[][] nextMarkers = new int[baseProjection.getWidth()][baseProjection.getHeight()];
+        int[][] itemMarkers = new int[baseProjection.getWidth()][baseProjection.getHeight()];
         for (int i = 0; i < rooms.size(); i++) {
-//            Room room = rooms.get(i);
-//            Vector2 roomPosition = room.getPosition();
-//            int xIndex = (int) (roomPosition.x / baseProjection.getTileSize());
-//            int yIndex = (int) (roomPosition.y / baseProjection.getTileSize());
-//
+            Room room = rooms.get(i);
+            Vector2 roomPosition = room.getPosition();
+            int xIndex = (int) (roomPosition.x / baseProjection.getTileSize());
+            int yIndex = (int) (roomPosition.y / baseProjection.getTileSize());
+
 //            if (roomPosition.x != 0) {
 //                int leftDoorPos = (int) (random.nextInt((int) (room.getWidth() + roomPosition.x)) + roomPosition.x);
 //                nextMarkers[leftDoorPos / baseProjection.getTileSize()][yIndex] = TiledMapProjection.MARKER_OPEN_DOOR;
@@ -42,10 +42,22 @@ public class ActionableMapFinisher {
 //            if (roomPosition.y + room.getHeight() < baseProjection.getHeight()) {
 //                int topDoorPos = (int) (random.nextInt((int) (room.getHeight() + roomPosition.y)) + roomPosition.y);
 //            }
+
+            // Generate intel
+
+            int nextIntelPosX = (int) (random.nextInt((int) (room.getWidth() + roomPosition.x)) + roomPosition.x);
+            int nextIntelPosY = (int) (random.nextInt((int) (room.getHeight() + roomPosition.y)) + roomPosition.y);
+            int nextIndexX = nextIntelPosX / baseProjection.getTileSize();
+            int nextIndexY = nextIntelPosX / baseProjection.getTileSize();
+
+
         }
 
-        baseProjection.setRawMatrixMarkersLayer(2, nextMarkers);
+
+        baseProjection.setRawMatrixMarkersLayer(2, itemMarkers);
 
         return baseProjection;
     }
+
+    //private
 }

@@ -202,19 +202,19 @@ public class PlayAreaScreen extends BaseScreen {
         boolean wIsPressed = Gdx.input.isKeyPressed(Input.Keys.W);
         boolean sIsPressed = Gdx.input.isKeyPressed(Input.Keys.S);
 
-        if (aIsPressed) {
+        if (aIsPressed/* && !willCollide(new Vector2(moveAction.getX() - nextMoveSpeed, moveAction.getY()))*/) {
             moveAction.setX(moveAction.getX() - nextMoveSpeed);
         }
 
-        if (dIsPressed) {
+        if (dIsPressed/* && !willCollide(new Vector2(moveAction.getX() + nextMoveSpeed, moveAction.getY()))*/) {
             moveAction.setX(moveAction.getX() + nextMoveSpeed);
         }
 
-        if (wIsPressed) {
+        if (wIsPressed/* && !willCollide(new Vector2(moveAction.getX(), moveAction.getY() + nextMoveSpeed))*/) {
             moveAction.setY(moveAction.getY() + nextMoveSpeed);
         }
 
-        if (sIsPressed) {
+        if (sIsPressed/* && !willCollide(new Vector2(moveAction.getX(), moveAction.getY() - nextMoveSpeed))*/) {
             moveAction.setY(moveAction.getY() - nextMoveSpeed);
         }
         //actionsQue.add(moveAction);
@@ -310,6 +310,24 @@ public class PlayAreaScreen extends BaseScreen {
 
         return angle;
     }
+
+//    public boolean willCollide(Vector2 nextPos)
+//    {
+//        AbstractMap.SimpleImmutableEntry<Integer, Integer> cords = tiledMapHelper.getTileIndexesByCords(mapProjection, nextPos.x, nextPos.y);
+//        Optional<TiledMapTileLayer.Cell> tgCell  = Optional.ofNullable(((TiledMapTileLayer)currentMap.getLayers().get(1)).getCell(cords.getKey(), cords.getValue()));
+//
+//        if (!tgCell.isPresent()) {
+//            return false;
+//        }
+//
+//        Optional<TiledMapTile> tgTile = Optional.ofNullable(tgCell.get().getTile());
+//
+//        return tgTile.filter(tiledMapTile -> (boolean) tiledMapTile.getProperties().get(MapGameProperties.BLOCKING.toString())).isPresent();
+//
+//        //float blockingElX = (Float)tgTile.get().getProperties().get(MapGameProperties.POSITION_X.toString());
+//        //float blockingElY = (Float)tgTile.get().getProperties().get(MapGameProperties.POSITION_Y.toString());
+//
+//    }
 
     private void handleDebug() {
 //        gameCore.font.setColor(Color.GREEN);
