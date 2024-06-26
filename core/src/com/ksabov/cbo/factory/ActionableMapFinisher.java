@@ -48,7 +48,7 @@ public class ActionableMapFinisher {
             int nextIntelPosX = (int) (random.nextInt((int) (room.getWidth() + roomPosition.x)) + roomPosition.x);
             int nextIntelPosY = (int) (random.nextInt((int) (room.getHeight() + roomPosition.y)) + roomPosition.y);
             int nextIndexX = nextIntelPosX / baseProjection.getTileSize();
-            int nextIndexY = nextIntelPosX / baseProjection.getTileSize();
+            int nextIndexY = nextIntelPosY / baseProjection.getTileSize();
 
 
         }
