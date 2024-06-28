@@ -10,8 +10,8 @@ import java.util.List;
 public class ChatRoomGenerator {
     private static final int GRID_ROWS = 4; // Number of rows in the grid
     private static final int GRID_COLS = 5; // Number of columns in the grid
-    private static final int ROOM_WIDTH = 150; // Width of each room
-    private static final int ROOM_HEIGHT = 100; // Height of each room
+    private static final int ROOM_WIDTH = 300; // Width of each room (increased)
+    private static final int ROOM_HEIGHT = 200; // Height of each room (increased)
     private static final int WALL_THICKNESS = 10; // Thickness of the walls between rooms
     private static final int MAP_WIDTH = GRID_COLS * (ROOM_WIDTH + WALL_THICKNESS); // Total width of the map
     private static final int MAP_HEIGHT = GRID_ROWS * (ROOM_HEIGHT + WALL_THICKNESS); // Total height of the map
@@ -19,13 +19,16 @@ public class ChatRoomGenerator {
 
     private List<Rectangle> rooms;
     private List<Rectangle> walls;
+    private List<Rectangle> doors; // Added doors list
 
     public ChatRoomGenerator() {
         rooms = new ArrayList<>();
         walls = new ArrayList<>();
+        doors = new ArrayList<>(); // Initialize doors list
         generateRooms();
         generateWalls();
-        generateBoundaryWalls(); // Add this line
+        generateBoundaryWalls();
+        generateDoors(); // Generate doors
     }
 
     private void generateRooms() {
@@ -72,12 +75,25 @@ public class ChatRoomGenerator {
         walls.add(new Rectangle(MAP_WIDTH + BORDER_SIZE, BORDER_SIZE - WALL_THICKNESS, WALL_THICKNESS, MAP_HEIGHT + WALL_THICKNESS * 2));
     }
 
+    private void generateDoors() {
+        for (Rectangle room : rooms) {
+            // Add a door in the middle of each room's right wall
+            int doorX = (int) (room.x + room.width - WALL_THICKNESS / 2);
+            int doorY = (int) (room.y + room.height / 2 - WALL_THICKNESS / 2);
+            doors.add(new Rectangle(doorX, doorY, WALL_THICKNESS, WALL_THICKNESS * 2));
+        }
+    }
+
     public List<Rectangle> getRooms() {
         return rooms;
     }
 
     public List<Rectangle> getWalls() {
         return walls;
+    }
+
+    public List<Rectangle> getDoors() {
+        return doors;
     }
 
     public void renderRooms(SpriteBatch batch, Texture roomTexture) {
@@ -89,6 +105,12 @@ public class ChatRoomGenerator {
     public void renderWalls(SpriteBatch batch, Texture wallTexture) {
         for (Rectangle wall : walls) {
             batch.draw(wallTexture, wall.x, wall.y, wall.width, wall.height);
+        }
+    }
+
+    public void renderDoors(SpriteBatch batch, Texture doorTexture) {
+        for (Rectangle door : doors) {
+            batch.draw(doorTexture, door.x, door.y, door.width, door.height);
         }
     }
 }

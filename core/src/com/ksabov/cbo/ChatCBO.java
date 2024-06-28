@@ -14,7 +14,6 @@ public class ChatCBO extends ApplicationAdapter {
     private Texture roomTexture;
     private Texture doorTexture;
     private ChatRoomGenerator chatRoomGenerator;
-    private ChatRoom chatRoom;
     private ChatPlayer chatPlayer;
     private OrthographicCamera camera;
 
@@ -26,12 +25,11 @@ public class ChatCBO extends ApplicationAdapter {
         doorTexture = new Texture("door.png");
 
         chatRoomGenerator = new ChatRoomGenerator();
-        chatRoom = new ChatRoom(wallTexture, doorTexture);
 
         // Example initial player position
         float playerX = chatRoomGenerator.getRooms().get(0).x + chatRoomGenerator.getRooms().get(0).width / 2;
         float playerY = chatRoomGenerator.getRooms().get(0).y + chatRoomGenerator.getRooms().get(0).height / 2;
-        chatPlayer = new ChatPlayer(new Texture("hero_standard_pose.png"), playerX, playerY, 50, 50, 200);
+        chatPlayer = new ChatPlayer(new Texture("hero_standard_pose.png"), playerX, playerY, 30, 30, 200); // Reduced player size
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(chatPlayer.getPosition().x + chatPlayer.getBounds().width / 2, chatPlayer.getPosition().y + chatPlayer.getBounds().height / 2, 0);
@@ -50,7 +48,7 @@ public class ChatCBO extends ApplicationAdapter {
     public void render() {
         float delta = Gdx.graphics.getDeltaTime();
 
-        chatPlayer.update(delta, chatRoomGenerator.getWalls(), chatRoom.getDoors()); // Pass doors list to player update
+        chatPlayer.update(delta, chatRoomGenerator.getWalls(), chatRoomGenerator.getDoors()); // Pass doors list to player update
 
         camera.position.set(chatPlayer.getPosition().x + chatPlayer.getBounds().width / 2, chatPlayer.getPosition().y + chatPlayer.getBounds().height / 2, 0);
         camera.update();
@@ -65,8 +63,8 @@ public class ChatCBO extends ApplicationAdapter {
         chatRoomGenerator.renderRooms(batch, roomTexture);
         // Render player
         chatPlayer.render(batch);
-        // Render chat room (doors)
-        chatRoom.render(batch);
+        // Render doors
+        chatRoomGenerator.renderDoors(batch, doorTexture);
         batch.end();
     }
 
