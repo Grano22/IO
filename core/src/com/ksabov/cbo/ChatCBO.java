@@ -20,6 +20,7 @@ public class ChatCBO extends ApplicationAdapter {
     private ChatRoomGenerator chatRoomGenerator;
     private ChatPlayer chatPlayer;
     private OrthographicCamera camera;
+    private Texture exitTexture;
     private OrthographicCamera hudCamera; // Separate camera for HUD
 
     @Override
@@ -29,6 +30,7 @@ public class ChatCBO extends ApplicationAdapter {
         roomTexture = new Texture("main_map.png");
         doorTexture = new Texture("door.png");
         itemTexture = new Texture("item.png");
+        exitTexture = new Texture("exit.png");
         font = new BitmapFont(); // Default font
 
         chatRoomGenerator = new ChatRoomGenerator();
@@ -67,6 +69,12 @@ public class ChatCBO extends ApplicationAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.setProjectionMatrix(camera.combined);
 
+        if (chatPlayer.getBounds().overlaps(chatRoomGenerator.getExitPoint())) {
+            chatRoomGenerator = new ChatRoomGenerator();
+            chatPlayer.setPoints(0);
+
+        }
+
         batch.begin();
         // Render walls
         chatRoomGenerator.renderWalls(batch, wallTexture);
@@ -78,6 +86,7 @@ public class ChatCBO extends ApplicationAdapter {
         chatRoomGenerator.renderDoors(batch, doorTexture);
         // Render items
         chatRoomGenerator.renderItems(batch, itemTexture);
+        chatRoomGenerator.renderExitPoint(batch, exitTexture);
         batch.end();
 
         // Render points (fixed on screen)
@@ -96,5 +105,6 @@ public class ChatCBO extends ApplicationAdapter {
         doorTexture.dispose();
         itemTexture.dispose();
         font.dispose();
+        exitTexture.dispose();
     }
 }

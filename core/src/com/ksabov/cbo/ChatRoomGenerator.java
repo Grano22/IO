@@ -26,6 +26,7 @@ public class ChatRoomGenerator {
     private List<Rectangle> walls;
     private List<Rectangle> doors;
     private List<Rectangle> items; // Added items list
+    private Rectangle exitPoint;
 
     public ChatRoomGenerator() {
         rooms = new ArrayList<>();
@@ -36,6 +37,16 @@ public class ChatRoomGenerator {
         generateWallsAndDoors();
         generateBoundaryWalls();
         generateItems();
+        generateExitPoint();
+    }
+
+    private void generateExitPoint() {
+        if (!rooms.isEmpty()) {
+            Rectangle farthestRoom = rooms.get(rooms.size() - 1);
+            int exitX = (int) (farthestRoom.x + farthestRoom.width / 2 - ITEM_SIZE / 2);
+            int exitY = (int) (farthestRoom.y + farthestRoom.height / 2 - ITEM_SIZE / 2);
+            exitPoint = new Rectangle(exitX, exitY, ITEM_SIZE, ITEM_SIZE);
+        }
     }
 
     private void generateRooms() {
@@ -140,6 +151,10 @@ public class ChatRoomGenerator {
         return items;
     }
 
+    public Rectangle getExitPoint() {
+        return exitPoint;
+    }
+
     public void renderRooms(SpriteBatch batch, Texture roomTexture) {
         for (Rectangle room : rooms) {
             batch.draw(roomTexture, room.x, room.y, room.width, room.height);
@@ -170,5 +185,11 @@ public class ChatRoomGenerator {
 
     public void removeItem(Rectangle item) {
         items.remove(item);
+    }
+
+    public void renderExitPoint(SpriteBatch batch, Texture exitTexture) {
+        if (exitPoint != null) {
+            batch.draw(exitTexture, exitPoint.x, exitPoint.y, exitPoint.width, exitPoint.height);
+        }
     }
 }

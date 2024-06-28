@@ -127,6 +127,10 @@ public class ChatPlayer {
         return position;
     }
 
+    public void setPoints(int newPoints) {
+        points = newPoints;
+    }
+
     public void setPosition(float x, float y) {
         position.set(x, y);
         bounds.setPosition(position);
