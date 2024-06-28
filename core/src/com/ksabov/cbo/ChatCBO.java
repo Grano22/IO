@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.InputAdapter;
@@ -13,6 +14,8 @@ public class ChatCBO extends ApplicationAdapter {
     private Texture wallTexture;
     private Texture roomTexture;
     private Texture doorTexture;
+    private Texture itemTexture;
+    private BitmapFont font;
     private ChatRoomGenerator chatRoomGenerator;
     private ChatPlayer chatPlayer;
     private OrthographicCamera camera;
@@ -23,6 +26,8 @@ public class ChatCBO extends ApplicationAdapter {
         wallTexture = new Texture("wall.jpg");
         roomTexture = new Texture("main_map.png");
         doorTexture = new Texture("door.png");
+        itemTexture = new Texture("item.png");
+        font = new BitmapFont(); // Default font
 
         chatRoomGenerator = new ChatRoomGenerator();
 
@@ -48,7 +53,7 @@ public class ChatCBO extends ApplicationAdapter {
     public void render() {
         float delta = Gdx.graphics.getDeltaTime();
 
-        chatPlayer.update(delta, chatRoomGenerator.getWalls(), chatRoomGenerator.getDoors(), chatRoomGenerator); // Pass doors list to player update
+        chatPlayer.update(delta, chatRoomGenerator.getWalls(), chatRoomGenerator.getDoors(), chatRoomGenerator.getItems(), chatRoomGenerator); // Pass doors and items list to player update
 
         camera.position.set(chatPlayer.getPosition().x + chatPlayer.getBounds().width / 2, chatPlayer.getPosition().y + chatPlayer.getBounds().height / 2, 0);
         camera.update();
@@ -65,6 +70,10 @@ public class ChatCBO extends ApplicationAdapter {
         chatPlayer.render(batch);
         // Render doors
         chatRoomGenerator.renderDoors(batch, doorTexture);
+        // Render items
+        chatRoomGenerator.renderItems(batch, itemTexture);
+        // Render points
+        font.draw(batch, "Points: " + chatPlayer.getPoints(), camera.position.x + camera.viewportWidth / 2 - 100, camera.position.y + camera.viewportHeight / 2 - 10);
         batch.end();
     }
 
@@ -74,5 +83,7 @@ public class ChatCBO extends ApplicationAdapter {
         wallTexture.dispose();
         roomTexture.dispose();
         doorTexture.dispose();
+        itemTexture.dispose();
+        font.dispose();
     }
 }

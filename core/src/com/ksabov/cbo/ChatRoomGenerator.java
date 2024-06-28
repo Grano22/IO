@@ -2,6 +2,7 @@ package com.ksabov.cbo;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
@@ -18,18 +19,23 @@ public class ChatRoomGenerator {
     private static final int MAP_WIDTH = GRID_COLS * (ROOM_WIDTH + WALL_THICKNESS); // Total width of the map
     private static final int MAP_HEIGHT = GRID_ROWS * (ROOM_HEIGHT + WALL_THICKNESS); // Total height of the map
     private static final int BORDER_SIZE = 50; // Size of the border around the map
+    private static final int ITEM_SIZE = 20; // Size of items
+    private static final int NUM_ITEMS = 10; // Number of items to generate
 
     private List<Rectangle> rooms;
     private List<Rectangle> walls;
-    private List<Rectangle> doors; // Added doors list
+    private List<Rectangle> doors;
+    private List<Rectangle> items; // Added items list
 
     public ChatRoomGenerator() {
         rooms = new ArrayList<>();
         walls = new ArrayList<>();
-        doors = new ArrayList<>(); // Initialize doors list
+        doors = new ArrayList<>();
+        items = new ArrayList<>(); // Initialize items list
         generateRooms();
-        generateWallsAndDoors(); // Generate walls and doors together
+        generateWallsAndDoors();
         generateBoundaryWalls();
+        generateItems();
     }
 
     private void generateRooms() {
@@ -89,6 +95,14 @@ public class ChatRoomGenerator {
         walls.add(new Rectangle(MAP_WIDTH + BORDER_SIZE, BORDER_SIZE - WALL_THICKNESS, WALL_THICKNESS, MAP_HEIGHT + WALL_THICKNESS * 2));
     }
 
+    private void generateItems() {
+        for (int i = 0; i < NUM_ITEMS; i++) {
+            int x = MathUtils.random(BORDER_SIZE, MAP_WIDTH + BORDER_SIZE - ITEM_SIZE);
+            int y = MathUtils.random(BORDER_SIZE, MAP_HEIGHT + BORDER_SIZE - ITEM_SIZE);
+            items.add(new Rectangle(x, y, ITEM_SIZE, ITEM_SIZE));
+        }
+    }
+
     public List<Rectangle> getRooms() {
         return rooms;
     }
@@ -99,6 +113,10 @@ public class ChatRoomGenerator {
 
     public List<Rectangle> getDoors() {
         return doors;
+    }
+
+    public List<Rectangle> getItems() {
+        return items;
     }
 
     public void renderRooms(SpriteBatch batch, Texture roomTexture) {
@@ -121,5 +139,15 @@ public class ChatRoomGenerator {
 
     public void removeDoor(Rectangle door) {
         doors.remove(door);
+    }
+
+    public void renderItems(SpriteBatch batch, Texture itemTexture) {
+        for (Rectangle item : items) {
+            batch.draw(itemTexture, item.x, item.y, item.width, item.height);
+        }
+    }
+
+    public void removeItem(Rectangle item) {
+        items.remove(item);
     }
 }

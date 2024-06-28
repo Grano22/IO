@@ -15,15 +15,17 @@ public class ChatPlayer {
     private Vector2 position;
     private float speed;
     private float interactionDistance = 40; // Distance from the door to interact
+    private int points; // Points for collecting items
 
     public ChatPlayer(Texture texture, float x, float y, float width, float height, float speed) {
         this.texture = texture;
         this.bounds = new Rectangle(x, y, width, height);
         this.position = new Vector2(x, y);
         this.speed = speed;
+        this.points = 0;
     }
 
-    public void update(float delta, List<Rectangle> walls, List<Rectangle> doors, ChatRoomGenerator chatRoomGenerator) {
+    public void update(float delta, List<Rectangle> walls, List<Rectangle> doors, List<Rectangle> items, ChatRoomGenerator chatRoomGenerator) {
         Vector2 oldPosition = new Vector2(position);
 
         // Move player based on input
@@ -74,6 +76,15 @@ public class ChatPlayer {
                 }
             }
         }
+
+        // Handle item collection
+        for (Rectangle item : items) {
+            if (bounds.overlaps(item)) {
+                chatRoomGenerator.removeItem(item);
+                points++;
+                break;
+            }
+        }
     }
 
     private boolean isNearDoor(Rectangle door) {
@@ -119,5 +130,9 @@ public class ChatPlayer {
     public void setPosition(float x, float y) {
         position.set(x, y);
         bounds.setPosition(position);
+    }
+
+    public int getPoints() {
+        return points;
     }
 }
