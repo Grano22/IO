@@ -14,7 +14,7 @@ public class ChatRoomGenerator {
     private static final int ROOM_HEIGHT = 200; // Height of each room (increased)
     private static final int WALL_THICKNESS = 10; // Thickness of the walls between rooms
     private static final int DOOR_WIDTH = 60; // Width of doors (wider than player)
-    private static final int DOOR_HEIGHT = 60; // Height of doors (double height)
+    private static final int DOOR_HEIGHT = 60; // Height of doors
     private static final int MAP_WIDTH = GRID_COLS * (ROOM_WIDTH + WALL_THICKNESS); // Total width of the map
     private static final int MAP_HEIGHT = GRID_ROWS * (ROOM_HEIGHT + WALL_THICKNESS); // Total height of the map
     private static final int BORDER_SIZE = 50; // Size of the border around the map

@@ -14,6 +14,7 @@ public class ChatPlayer {
     private Rectangle bounds;
     private Vector2 position;
     private float speed;
+    private float interactionDistance = 40; // Distance from the door to interact
 
     public ChatPlayer(Texture texture, float x, float y, float width, float height, float speed) {
         this.texture = texture;
@@ -59,13 +60,22 @@ public class ChatPlayer {
         // Handle interaction with doors (spacebar)
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             for (Rectangle door : doors) {
-                if (bounds.overlaps(door)) {
+                if (isNearDoor(door)) {
                     // Remove the door and move the player to the corresponding room
                     chatRoomGenerator.removeDoor(door);
                     moveThroughDoor(door);
                     break; // Exit door interaction loop
                 }
             }
+        }
+    }
+
+    private boolean isNearDoor(Rectangle door) {
+        float distance = interactionDistance + Math.max(bounds.width, bounds.height);
+        if (door.width > door.height) { // Horizontal door
+            return position.x > door.x - distance && position.x < door.x + door.width + distance && Math.abs(position.y - door.y) < interactionDistance;
+        } else { // Vertical door
+            return position.y > door.y - distance && position.y < door.y + door.height + distance && Math.abs(position.x - door.x) < interactionDistance;
         }
     }
 
