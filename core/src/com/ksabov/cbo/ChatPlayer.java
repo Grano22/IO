@@ -42,12 +42,18 @@ public class ChatPlayer {
         bounds.setPosition(position);
 
         // Handle collision with walls
+        boolean collidedWithWall = false;
         for (Rectangle wall : walls) {
             if (bounds.overlaps(wall)) {
-                position.set(oldPosition); // Revert to old position
-                bounds.setPosition(position);
-                break; // Exit collision detection loop
+                collidedWithWall = true;
+                break;
             }
+        }
+
+        // If collided with a wall, revert to old position
+        if (collidedWithWall) {
+            position.set(oldPosition);
+            bounds.setPosition(position);
         }
 
         // Handle interaction with doors (spacebar)
@@ -55,38 +61,30 @@ public class ChatPlayer {
             for (Rectangle door : doors) {
                 if (bounds.overlaps(door)) {
                     // Move the player to the corresponding room
-                    moveThroughDoor(door, walls, doors);
+                    moveThroughDoor(door);
                     break; // Exit door interaction loop
                 }
             }
         }
     }
 
-    private void moveThroughDoor(Rectangle door, List<Rectangle> walls, List<Rectangle> doors) {
+    private void moveThroughDoor(Rectangle door) {
         // Adjust the player's position based on the door they passed through
-        for (Rectangle wall : walls) {
-            if (door.overlaps(wall)) {
-                doors.remove(door); // Remove the door from the list to make it one-time passable
-
-                // Check the direction of the door and move the player accordingly
-                if (door.width > door.height) { // Horizontal door
-                    if (position.y > door.y) { // Moving up
-                        position.y += bounds.height;
-                    } else { // Moving down
-                        position.y -= bounds.height;
-                    }
-                } else { // Vertical door
-                    if (position.x > door.x) { // Moving right
-                        position.x += bounds.width;
-                    } else { // Moving left
-                        position.x -= bounds.width;
-                    }
-                }
-
-                bounds.setPosition(position);
-                break; // Exit the loop after finding the relevant door
+        if (door.width > door.height) { // Horizontal door
+            if (position.y > door.y) { // Moving up
+                position.y += bounds.height + door.height;
+            } else { // Moving down
+                position.y -= bounds.height + door.height;
+            }
+        } else { // Vertical door
+            if (position.x > door.x) { // Moving right
+                position.x += bounds.width + door.width;
+            } else { // Moving left
+                position.x -= bounds.width + door.width;
             }
         }
+
+        bounds.setPosition(position);
     }
 
     public void render(SpriteBatch batch) {

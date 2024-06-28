@@ -13,6 +13,8 @@ public class ChatRoomGenerator {
     private static final int ROOM_WIDTH = 300; // Width of each room (increased)
     private static final int ROOM_HEIGHT = 200; // Height of each room (increased)
     private static final int WALL_THICKNESS = 10; // Thickness of the walls between rooms
+    private static final int DOOR_WIDTH = WALL_THICKNESS; // Width of doors (single thickness, spanning two positions)
+    private static final int DOOR_HEIGHT = 2 * WALL_THICKNESS; // Height of doors
     private static final int MAP_WIDTH = GRID_COLS * (ROOM_WIDTH + WALL_THICKNESS); // Total width of the map
     private static final int MAP_HEIGHT = GRID_ROWS * (ROOM_HEIGHT + WALL_THICKNESS); // Total height of the map
     private static final int BORDER_SIZE = 50; // Size of the border around the map
@@ -84,15 +86,15 @@ public class ChatRoomGenerator {
                 // Add doors to the right of each room except the last column
                 if (col < GRID_COLS - 1) {
                     int doorX = x + ROOM_WIDTH;
-                    int doorY = y + ROOM_HEIGHT / 2 - WALL_THICKNESS / 2;
-                    doors.add(new Rectangle(doorX, doorY, WALL_THICKNESS, WALL_THICKNESS * 2));
+                    int doorY = y + ROOM_HEIGHT / 2 - DOOR_HEIGHT / 2;
+                    doors.add(new Rectangle(doorX, doorY, DOOR_WIDTH, DOOR_HEIGHT));
                 }
 
                 // Add doors to the top of each room except the last row
                 if (row < GRID_ROWS - 1) {
-                    int doorX = x + ROOM_WIDTH / 2 - WALL_THICKNESS / 2;
+                    int doorX = x + ROOM_WIDTH / 2 - DOOR_HEIGHT / 2;
                     int doorY = y + ROOM_HEIGHT;
-                    doors.add(new Rectangle(doorX, doorY, WALL_THICKNESS * 2, WALL_THICKNESS));
+                    doors.add(new Rectangle(doorX, doorY, DOOR_HEIGHT, DOOR_WIDTH));
                 }
             }
         }
