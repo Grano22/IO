@@ -42,17 +42,23 @@ public class ChatPlayer {
 
         bounds.setPosition(position);
 
-        // Handle collision with walls, but ignore opened doors
-        boolean collidedWithWall = false;
+        // Handle collision with walls and closed doors
+        boolean collidedWithWallOrDoor = false;
         for (Rectangle wall : walls) {
             if (bounds.overlaps(wall)) {
-                collidedWithWall = true;
+                collidedWithWallOrDoor = true;
+                break;
+            }
+        }
+        for (Rectangle door : doors) {
+            if (bounds.overlaps(door)) {
+                collidedWithWallOrDoor = true;
                 break;
             }
         }
 
-        // If collided with a wall, revert to old position
-        if (collidedWithWall) {
+        // If collided with a wall or closed door, revert to old position
+        if (collidedWithWallOrDoor) {
             position.set(oldPosition);
             bounds.setPosition(position);
         }
