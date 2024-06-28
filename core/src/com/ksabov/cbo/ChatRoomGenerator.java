@@ -28,9 +28,8 @@ public class ChatRoomGenerator {
         walls = new ArrayList<>();
         doors = new ArrayList<>(); // Initialize doors list
         generateRooms();
-        generateWalls();
+        generateWallsAndDoors(); // Generate walls and doors together
         generateBoundaryWalls();
-        generateDoors(); // Generate doors
     }
 
     private void generateRooms() {
@@ -44,24 +43,37 @@ public class ChatRoomGenerator {
         }
     }
 
-    private void generateWalls() {
-        // Vertical walls between rooms
+    private void generateWallsAndDoors() {
         for (int row = 0; row < GRID_ROWS; row++) {
-            for (int col = 1; col < GRID_COLS; col++) {
-                int x = col * (ROOM_WIDTH + WALL_THICKNESS) - WALL_THICKNESS / 2 + BORDER_SIZE;
-                int y = row * (ROOM_HEIGHT + WALL_THICKNESS) + BORDER_SIZE;
-                int height = ROOM_HEIGHT;
-                walls.add(new Rectangle(x, y, WALL_THICKNESS, height));
-            }
-        }
-
-        // Horizontal walls between rooms
-        for (int row = 1; row < GRID_ROWS; row++) {
             for (int col = 0; col < GRID_COLS; col++) {
                 int x = col * (ROOM_WIDTH + WALL_THICKNESS) + BORDER_SIZE;
-                int y = row * (ROOM_HEIGHT + WALL_THICKNESS) - WALL_THICKNESS / 2 + BORDER_SIZE;
-                int width = ROOM_WIDTH;
-                walls.add(new Rectangle(x, y, width, WALL_THICKNESS));
+                int y = row * (ROOM_HEIGHT + WALL_THICKNESS) + BORDER_SIZE;
+
+                // Add vertical walls and doors
+                if (col < GRID_COLS - 1) {
+                    int wallX = x + ROOM_WIDTH;
+                    int doorY = y + ROOM_HEIGHT / 2 - DOOR_HEIGHT / 2;
+
+                    // Top part of the wall
+                    walls.add(new Rectangle(wallX, y, WALL_THICKNESS, ROOM_HEIGHT / 2 - DOOR_HEIGHT / 2));
+                    // Bottom part of the wall
+                    walls.add(new Rectangle(wallX, doorY + DOOR_HEIGHT, WALL_THICKNESS, ROOM_HEIGHT / 2 - DOOR_HEIGHT / 2));
+                    // Door
+                    doors.add(new Rectangle(wallX, doorY, DOOR_WIDTH, DOOR_HEIGHT));
+                }
+
+                // Add horizontal walls and doors
+                if (row < GRID_ROWS - 1) {
+                    int wallY = y + ROOM_HEIGHT;
+                    int doorX = x + ROOM_WIDTH / 2 - DOOR_HEIGHT / 2;
+
+                    // Left part of the wall
+                    walls.add(new Rectangle(x, wallY, ROOM_WIDTH / 2 - DOOR_HEIGHT / 2, WALL_THICKNESS));
+                    // Right part of the wall
+                    walls.add(new Rectangle(doorX + DOOR_HEIGHT, wallY, ROOM_WIDTH / 2 - DOOR_HEIGHT / 2, WALL_THICKNESS));
+                    // Door
+                    doors.add(new Rectangle(doorX, wallY, DOOR_HEIGHT, DOOR_WIDTH));
+                }
             }
         }
     }
@@ -75,29 +87,6 @@ public class ChatRoomGenerator {
         walls.add(new Rectangle(BORDER_SIZE - WALL_THICKNESS, BORDER_SIZE - WALL_THICKNESS, WALL_THICKNESS, MAP_HEIGHT + WALL_THICKNESS * 2));
         // Right boundary wall
         walls.add(new Rectangle(MAP_WIDTH + BORDER_SIZE, BORDER_SIZE - WALL_THICKNESS, WALL_THICKNESS, MAP_HEIGHT + WALL_THICKNESS * 2));
-    }
-
-    private void generateDoors() {
-        for (int row = 0; row < GRID_ROWS; row++) {
-            for (int col = 0; col < GRID_COLS; col++) {
-                int x = col * (ROOM_WIDTH + WALL_THICKNESS) + BORDER_SIZE;
-                int y = row * (ROOM_HEIGHT + WALL_THICKNESS) + BORDER_SIZE;
-
-                // Add doors to the right of each room except the last column
-                if (col < GRID_COLS - 1) {
-                    int doorX = x + ROOM_WIDTH;
-                    int doorY = y + ROOM_HEIGHT / 2 - DOOR_HEIGHT / 2;
-                    doors.add(new Rectangle(doorX, doorY, DOOR_WIDTH, DOOR_HEIGHT));
-                }
-
-                // Add doors to the top of each room except the last row
-                if (row < GRID_ROWS - 1) {
-                    int doorX = x + ROOM_WIDTH / 2 - DOOR_HEIGHT / 2;
-                    int doorY = y + ROOM_HEIGHT;
-                    doors.add(new Rectangle(doorX, doorY, DOOR_HEIGHT, DOOR_WIDTH));
-                }
-            }
-        }
     }
 
     public List<Rectangle> getRooms() {
@@ -128,5 +117,9 @@ public class ChatRoomGenerator {
         for (Rectangle door : doors) {
             batch.draw(doorTexture, door.x, door.y, door.width, door.height);
         }
+    }
+
+    public void removeDoor(Rectangle door) {
+        doors.remove(door);
     }
 }

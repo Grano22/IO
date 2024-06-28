@@ -48,7 +48,7 @@ public class ChatCBO extends ApplicationAdapter {
     public void render() {
         float delta = Gdx.graphics.getDeltaTime();
 
-        chatPlayer.update(delta, chatRoomGenerator.getWalls(), chatRoomGenerator.getDoors()); // Pass doors list to player update
+        chatPlayer.update(delta, chatRoomGenerator.getWalls(), chatRoomGenerator.getDoors(), chatRoomGenerator); // Pass doors list to player update
 
         camera.position.set(chatPlayer.getPosition().x + chatPlayer.getBounds().width / 2, chatPlayer.getPosition().y + chatPlayer.getBounds().height / 2, 0);
         camera.update();

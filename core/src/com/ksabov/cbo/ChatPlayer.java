@@ -22,7 +22,7 @@ public class ChatPlayer {
         this.speed = speed;
     }
 
-    public void update(float delta, List<Rectangle> walls, List<Rectangle> doors) {
+    public void update(float delta, List<Rectangle> walls, List<Rectangle> doors, ChatRoomGenerator chatRoomGenerator) {
         Vector2 oldPosition = new Vector2(position);
 
         // Move player based on input
@@ -41,7 +41,7 @@ public class ChatPlayer {
 
         bounds.setPosition(position);
 
-        // Handle collision with walls
+        // Handle collision with walls, but ignore opened doors
         boolean collidedWithWall = false;
         for (Rectangle wall : walls) {
             if (bounds.overlaps(wall)) {
@@ -60,7 +60,8 @@ public class ChatPlayer {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             for (Rectangle door : doors) {
                 if (bounds.overlaps(door)) {
-                    // Move the player to the corresponding room
+                    // Remove the door and move the player to the corresponding room
+                    chatRoomGenerator.removeDoor(door);
                     moveThroughDoor(door);
                     break; // Exit door interaction loop
                 }
