@@ -97,9 +97,30 @@ public class ChatRoomGenerator {
 
     private void generateItems() {
         for (int i = 0; i < NUM_ITEMS; i++) {
-            int x = MathUtils.random(BORDER_SIZE, MAP_WIDTH + BORDER_SIZE - ITEM_SIZE);
-            int y = MathUtils.random(BORDER_SIZE, MAP_HEIGHT + BORDER_SIZE - ITEM_SIZE);
-            items.add(new Rectangle(x, y, ITEM_SIZE, ITEM_SIZE));
+            Rectangle item;
+            boolean collides;
+            do {
+                collides = false;
+                int x = MathUtils.random(BORDER_SIZE, MAP_WIDTH + BORDER_SIZE - ITEM_SIZE);
+                int y = MathUtils.random(BORDER_SIZE, MAP_HEIGHT + BORDER_SIZE - ITEM_SIZE);
+                item = new Rectangle(x, y, ITEM_SIZE, ITEM_SIZE);
+
+                // Check collision with walls
+                for (Rectangle wall : walls) {
+                    if (item.overlaps(wall)) {
+                        collides = true;
+                        break;
+                    }
+                }
+                // Check collision with doors
+                for (Rectangle door : doors) {
+                    if (item.overlaps(door)) {
+                        collides = true;
+                        break;
+                    }
+                }
+            } while (collides);
+            items.add(item);
         }
     }
 

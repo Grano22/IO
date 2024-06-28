@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 
 public class ChatCBO extends ApplicationAdapter {
     private SpriteBatch batch;
@@ -19,6 +20,7 @@ public class ChatCBO extends ApplicationAdapter {
     private ChatRoomGenerator chatRoomGenerator;
     private ChatPlayer chatPlayer;
     private OrthographicCamera camera;
+    private OrthographicCamera hudCamera; // Separate camera for HUD
 
     @Override
     public void create() {
@@ -39,6 +41,10 @@ public class ChatCBO extends ApplicationAdapter {
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(chatPlayer.getPosition().x + chatPlayer.getBounds().width / 2, chatPlayer.getPosition().y + chatPlayer.getBounds().height / 2, 0);
         camera.update();
+
+        hudCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        hudCamera.position.set(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, 0);
+        hudCamera.update();
 
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
@@ -72,8 +78,13 @@ public class ChatCBO extends ApplicationAdapter {
         chatRoomGenerator.renderDoors(batch, doorTexture);
         // Render items
         chatRoomGenerator.renderItems(batch, itemTexture);
-        // Render points
-        font.draw(batch, "Points: " + chatPlayer.getPoints(), camera.position.x + camera.viewportWidth / 2 - 100, camera.position.y + camera.viewportHeight / 2 - 10);
+        batch.end();
+
+        // Render points (fixed on screen)
+        batch.setProjectionMatrix(hudCamera.combined);
+        batch.begin();
+        GlyphLayout layout = new GlyphLayout(font, "Points: " + chatPlayer.getPoints());
+        font.draw(batch, layout, hudCamera.viewportWidth - layout.width - 10, hudCamera.viewportHeight - 10);
         batch.end();
     }
 
