@@ -12,7 +12,9 @@ public class ChatCBO extends ApplicationAdapter {
     private SpriteBatch batch;
     private Texture wallTexture;
     private Texture roomTexture;
+    private Texture doorTexture;
     private ChatRoomGenerator chatRoomGenerator;
+    private ChatRoom chatRoom;
     private ChatPlayer chatPlayer;
     private OrthographicCamera camera;
 
@@ -21,8 +23,10 @@ public class ChatCBO extends ApplicationAdapter {
         batch = new SpriteBatch();
         wallTexture = new Texture("wall.jpg");
         roomTexture = new Texture("main_map.png");
+        doorTexture = new Texture("door.png");
 
         chatRoomGenerator = new ChatRoomGenerator();
+        chatRoom = new ChatRoom(wallTexture, doorTexture);
 
         // Example initial player position
         float playerX = chatRoomGenerator.getRooms().get(0).x + chatRoomGenerator.getRooms().get(0).width / 2;
@@ -46,7 +50,7 @@ public class ChatCBO extends ApplicationAdapter {
     public void render() {
         float delta = Gdx.graphics.getDeltaTime();
 
-        chatPlayer.update(delta, chatRoomGenerator.getWalls(), null); // Pass walls list to player update
+        chatPlayer.update(delta, chatRoomGenerator.getWalls(), chatRoom.getDoors()); // Pass doors list to player update
 
         camera.position.set(chatPlayer.getPosition().x + chatPlayer.getBounds().width / 2, chatPlayer.getPosition().y + chatPlayer.getBounds().height / 2, 0);
         camera.update();
@@ -61,6 +65,8 @@ public class ChatCBO extends ApplicationAdapter {
         chatRoomGenerator.renderRooms(batch, roomTexture);
         // Render player
         chatPlayer.render(batch);
+        // Render chat room (doors)
+        chatRoom.render(batch);
         batch.end();
     }
 
@@ -69,6 +75,6 @@ public class ChatCBO extends ApplicationAdapter {
         batch.dispose();
         wallTexture.dispose();
         roomTexture.dispose();
-
+        doorTexture.dispose();
     }
 }
