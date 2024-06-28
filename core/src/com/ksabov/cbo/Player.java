@@ -9,15 +9,16 @@ import com.badlogic.gdx.Input;
 
 import java.util.List;
 
-public class ChatPlayer {
+public class Player {
     private Texture texture;
     private Rectangle bounds;
     private Vector2 position;
     private float speed;
     private float interactionDistance = 40; // Distance from the door to interact
     private int points; // Points for collecting items
+    private Rectangle currentRoom;
 
-    public ChatPlayer(Texture texture, float x, float y, float width, float height, float speed) {
+    public Player(Texture texture, float x, float y, float width, float height, float speed) {
         this.texture = texture;
         this.bounds = new Rectangle(x, y, width, height);
         this.position = new Vector2(x, y);
@@ -25,7 +26,7 @@ public class ChatPlayer {
         this.points = 0;
     }
 
-    public void update(float delta, List<Rectangle> walls, List<Rectangle> doors, List<Rectangle> items, ChatRoomGenerator chatRoomGenerator) {
+    public void update(float delta, List<Rectangle> walls, List<Rectangle> doors, List<Rectangle> items, RoomGenerator roomGenerator) {
         Vector2 oldPosition = new Vector2(position);
 
         // Move player based on input
@@ -70,7 +71,7 @@ public class ChatPlayer {
             for (Rectangle door : doors) {
                 if (isNearDoor(door)) {
                     // Remove the door and move the player to the corresponding room
-                    chatRoomGenerator.removeDoor(door);
+                    roomGenerator.removeDoor(door);
                     moveThroughDoor(door);
                     break; // Exit door interaction loop
                 }
@@ -80,7 +81,7 @@ public class ChatPlayer {
         // Handle item collection
         for (Rectangle item : items) {
             if (bounds.overlaps(item)) {
-                chatRoomGenerator.removeItem(item);
+                roomGenerator.removeItem(item);
                 points++;
                 break;
             }
@@ -136,7 +137,16 @@ public class ChatPlayer {
         bounds.setPosition(position);
     }
 
+    public void moveToRoom(Rectangle room) {
+        currentRoom = room;
+        setPosition(currentRoom.x, currentRoom.y);
+    }
+
     public int getPoints() {
         return points;
+    }
+
+    public Rectangle getCurrentRoom() {
+        return currentRoom;
     }
 }

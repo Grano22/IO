@@ -3,7 +3,7 @@ package com.ksabov.cbo.client;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
 import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;
-import com.ksabov.cbo.ChatCBO;
+import com.ksabov.cbo.CBO;
 
 public class HtmlLauncher extends GwtApplication {
 
@@ -17,6 +17,6 @@ public class HtmlLauncher extends GwtApplication {
 
         @Override
         public ApplicationListener createApplicationListener () {
-                return new ChatCBO();
+                return new CBO();
         }
 }

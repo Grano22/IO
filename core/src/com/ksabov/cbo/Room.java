@@ -8,14 +8,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class ChatRoom {
+public class Room {
     private Texture wallTexture;
     private Texture doorTexture;
     private List<Rectangle> walls;
     private List<Rectangle> doors;
     private List<Item> items;
 
-    public ChatRoom(Texture wallTexture, Texture doorTexture) {
+    public Room(Texture wallTexture, Texture doorTexture) {
         this.wallTexture = wallTexture;
         this.doorTexture = doorTexture;
         walls = new ArrayList<>();

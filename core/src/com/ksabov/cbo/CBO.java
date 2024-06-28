@@ -9,19 +9,28 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.math.Rectangle;
 
-public class ChatCBO extends ApplicationAdapter {
+import java.util.Optional;
+
+public class CBO extends ApplicationAdapter {
+    private final RoomOperator roomOperator = new RoomOperator();
     private SpriteBatch batch;
     private Texture wallTexture;
     private Texture roomTexture;
     private Texture doorTexture;
     private Texture itemTexture;
     private BitmapFont font;
-    private ChatRoomGenerator chatRoomGenerator;
-    private ChatPlayer chatPlayer;
+    private RoomGenerator roomGenerator;
+    private ItemsGenerator itemsGenerator;
+    private ItemsRenderer itemsRenderer = new ItemsRenderer();
+    private RoomsUtils roomsUtils;
+    private Player chatPlayer;
     private OrthographicCamera camera;
     private Texture exitTexture;
     private OrthographicCamera hudCamera; // Separate camera for HUD
+
+    private Rectangle exitPoint;
 
     @Override
     public void create() {
@@ -33,12 +42,25 @@ public class ChatCBO extends ApplicationAdapter {
         exitTexture = new Texture("exit.png");
         font = new BitmapFont(); // Default font
 
-        chatRoomGenerator = new ChatRoomGenerator();
+        roomGenerator = new RoomGenerator();
+        roomsUtils = new RoomsUtils(roomGenerator.getRooms());
+        itemsGenerator = new ItemsGenerator();
 
         // Example initial player position
-        float playerX = chatRoomGenerator.getRooms().get(0).x + chatRoomGenerator.getRooms().get(0).width / 2;
-        float playerY = chatRoomGenerator.getRooms().get(0).y + chatRoomGenerator.getRooms().get(0).height / 2;
-        chatPlayer = new ChatPlayer(new Texture("hero_standard_pose.png"), playerX, playerY, 30, 30, 200); // Reduced player size
+        float playerX = roomGenerator.getRooms().get(0).x + roomGenerator.getRooms().get(0).width / 2;
+        float playerY = roomGenerator.getRooms().get(0).y + roomGenerator.getRooms().get(0).height / 2;
+        chatPlayer = new Player(new Texture("hero_standard_pose.png"), playerX, playerY, 30, 30, 200); // Reduced player size
+        Rectangle randomizedRoom = roomOperator.randomizeRoom(roomGenerator.getRooms());
+        chatPlayer.moveToRoom(randomizedRoom);
+
+        Optional<Rectangle> exitPointResult = itemsGenerator.generateExitPoint(chatPlayer, roomsUtils);
+
+        if (!exitPointResult.isPresent()) {
+            System.out.println("Cannot generate exit point");
+            System.exit(1);
+        }
+
+        exitPoint = exitPointResult.get();
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(chatPlayer.getPosition().x + chatPlayer.getBounds().width / 2, chatPlayer.getPosition().y + chatPlayer.getBounds().height / 2, 0);
@@ -61,7 +83,7 @@ public class ChatCBO extends ApplicationAdapter {
     public void render() {
         float delta = Gdx.graphics.getDeltaTime();
 
-        chatPlayer.update(delta, chatRoomGenerator.getWalls(), chatRoomGenerator.getDoors(), chatRoomGenerator.getItems(), chatRoomGenerator); // Pass doors and items list to player update
+        chatPlayer.update(delta, roomGenerator.getWalls(), roomGenerator.getDoors(), roomGenerator.getItems(), roomGenerator); // Pass doors and items list to player update
 
         camera.position.set(chatPlayer.getPosition().x + chatPlayer.getBounds().width / 2, chatPlayer.getPosition().y + chatPlayer.getBounds().height / 2, 0);
         camera.update();
@@ -69,24 +91,27 @@ public class ChatCBO extends ApplicationAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.setProjectionMatrix(camera.combined);
 
-        if (chatPlayer.getBounds().overlaps(chatRoomGenerator.getExitPoint())) {
-            chatRoomGenerator = new ChatRoomGenerator();
+        if (chatPlayer.getBounds().overlaps(exitPoint)) {
+            roomGenerator = new RoomGenerator();
             chatPlayer.setPoints(0);
-
+            Rectangle randomizedRoom = roomOperator.randomizeRoom(roomGenerator.getRooms());
+            chatPlayer.moveToRoom(randomizedRoom);
+            Rectangle farthestRoom = roomsUtils.getFarthestRoomToThePlayer(chatPlayer);
+            exitPoint.setPosition(farthestRoom.x, farthestRoom.y);
         }
 
         batch.begin();
         // Render walls
-        chatRoomGenerator.renderWalls(batch, wallTexture);
+        roomGenerator.renderWalls(batch, wallTexture);
         // Render rooms
-        chatRoomGenerator.renderRooms(batch, roomTexture);
+        roomGenerator.renderRooms(batch, roomTexture);
         // Render player
         chatPlayer.render(batch);
         // Render doors
-        chatRoomGenerator.renderDoors(batch, doorTexture);
+        roomGenerator.renderDoors(batch, doorTexture);
         // Render items
-        chatRoomGenerator.renderItems(batch, itemTexture);
-        chatRoomGenerator.renderExitPoint(batch, exitTexture);
+        roomGenerator.renderItems(batch, itemTexture);
+        itemsRenderer.renderExitPoint(exitPoint, batch, exitTexture);
         batch.end();
 
         // Render points (fixed on screen)

@@ -9,6 +9,6 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		config.setTitle("CBO");
-		new Lwjgl3Application(new ChatCBO(), config);
+		new Lwjgl3Application(new CBO(), config);
 	}
 }
