@@ -25,6 +25,7 @@ public class ChatRoomGenerator {
         walls = new ArrayList<>();
         generateRooms();
         generateWalls();
+        generateBoundaryWalls(); // Add this line
     }
 
     private void generateRooms() {
@@ -58,6 +59,17 @@ public class ChatRoomGenerator {
                 walls.add(new Rectangle(x, y, width, WALL_THICKNESS));
             }
         }
+    }
+
+    private void generateBoundaryWalls() {
+        // Top boundary wall
+        walls.add(new Rectangle(BORDER_SIZE - WALL_THICKNESS, BORDER_SIZE - WALL_THICKNESS, MAP_WIDTH + WALL_THICKNESS * 2, WALL_THICKNESS));
+        // Bottom boundary wall
+        walls.add(new Rectangle(BORDER_SIZE - WALL_THICKNESS, MAP_HEIGHT + BORDER_SIZE, MAP_WIDTH + WALL_THICKNESS * 2, WALL_THICKNESS));
+        // Left boundary wall
+        walls.add(new Rectangle(BORDER_SIZE - WALL_THICKNESS, BORDER_SIZE - WALL_THICKNESS, WALL_THICKNESS, MAP_HEIGHT + WALL_THICKNESS * 2));
+        // Right boundary wall
+        walls.add(new Rectangle(MAP_WIDTH + BORDER_SIZE, BORDER_SIZE - WALL_THICKNESS, WALL_THICKNESS, MAP_HEIGHT + WALL_THICKNESS * 2));
     }
 
     public List<Rectangle> getRooms() {
