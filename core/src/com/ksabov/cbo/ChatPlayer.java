@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+
 import java.util.List;
 
 public class ChatPlayer {
@@ -53,10 +54,37 @@ public class ChatPlayer {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             for (Rectangle door : doors) {
                 if (bounds.overlaps(door)) {
-                    doors.remove(door); // Remove the door from the list
-                    System.out.println("Door opened!");
+                    // Move the player to the corresponding room
+                    moveThroughDoor(door, walls, doors);
                     break; // Exit door interaction loop
                 }
+            }
+        }
+    }
+
+    private void moveThroughDoor(Rectangle door, List<Rectangle> walls, List<Rectangle> doors) {
+        // Adjust the player's position based on the door they passed through
+        for (Rectangle wall : walls) {
+            if (door.overlaps(wall)) {
+                doors.remove(door); // Remove the door from the list to make it one-time passable
+
+                // Check the direction of the door and move the player accordingly
+                if (door.width > door.height) { // Horizontal door
+                    if (position.y > door.y) { // Moving up
+                        position.y += bounds.height;
+                    } else { // Moving down
+                        position.y -= bounds.height;
+                    }
+                } else { // Vertical door
+                    if (position.x > door.x) { // Moving right
+                        position.x += bounds.width;
+                    } else { // Moving left
+                        position.x -= bounds.width;
+                    }
+                }
+
+                bounds.setPosition(position);
+                break; // Exit the loop after finding the relevant door
             }
         }
     }

@@ -76,11 +76,25 @@ public class ChatRoomGenerator {
     }
 
     private void generateDoors() {
-        for (Rectangle room : rooms) {
-            // Add a door in the middle of each room's right wall
-            int doorX = (int) (room.x + room.width - WALL_THICKNESS / 2);
-            int doorY = (int) (room.y + room.height / 2 - WALL_THICKNESS / 2);
-            doors.add(new Rectangle(doorX, doorY, WALL_THICKNESS, WALL_THICKNESS * 2));
+        for (int row = 0; row < GRID_ROWS; row++) {
+            for (int col = 0; col < GRID_COLS; col++) {
+                int x = col * (ROOM_WIDTH + WALL_THICKNESS) + BORDER_SIZE;
+                int y = row * (ROOM_HEIGHT + WALL_THICKNESS) + BORDER_SIZE;
+
+                // Add doors to the right of each room except the last column
+                if (col < GRID_COLS - 1) {
+                    int doorX = x + ROOM_WIDTH;
+                    int doorY = y + ROOM_HEIGHT / 2 - WALL_THICKNESS / 2;
+                    doors.add(new Rectangle(doorX, doorY, WALL_THICKNESS, WALL_THICKNESS * 2));
+                }
+
+                // Add doors to the top of each room except the last row
+                if (row < GRID_ROWS - 1) {
+                    int doorX = x + ROOM_WIDTH / 2 - WALL_THICKNESS / 2;
+                    int doorY = y + ROOM_HEIGHT;
+                    doors.add(new Rectangle(doorX, doorY, WALL_THICKNESS * 2, WALL_THICKNESS));
+                }
+            }
         }
     }
 
