@@ -13,8 +13,8 @@ public class ChatRoomGenerator {
     private static final int ROOM_WIDTH = 300; // Width of each room (increased)
     private static final int ROOM_HEIGHT = 200; // Height of each room (increased)
     private static final int WALL_THICKNESS = 10; // Thickness of the walls between rooms
-    private static final int DOOR_WIDTH = WALL_THICKNESS; // Width of doors (single thickness, spanning two positions)
-    private static final int DOOR_HEIGHT = 2 * WALL_THICKNESS; // Height of doors
+    private static final int DOOR_WIDTH = 60; // Width of doors (wider than player)
+    private static final int DOOR_HEIGHT = 2 * WALL_THICKNESS; // Height of doors (double height)
     private static final int MAP_WIDTH = GRID_COLS * (ROOM_WIDTH + WALL_THICKNESS); // Total width of the map
     private static final int MAP_HEIGHT = GRID_ROWS * (ROOM_HEIGHT + WALL_THICKNESS); // Total height of the map
     private static final int BORDER_SIZE = 50; // Size of the border around the map
@@ -59,20 +59,20 @@ public class ChatRoomGenerator {
                     // Bottom part of the wall
                     walls.add(new Rectangle(wallX, doorY + DOOR_HEIGHT, WALL_THICKNESS, ROOM_HEIGHT / 2 - DOOR_HEIGHT / 2));
                     // Door
-                    doors.add(new Rectangle(wallX, doorY, DOOR_WIDTH, DOOR_HEIGHT));
+                    doors.add(new Rectangle(wallX, doorY, WALL_THICKNESS, DOOR_HEIGHT));
                 }
 
                 // Add horizontal walls and doors
                 if (row < GRID_ROWS - 1) {
                     int wallY = y + ROOM_HEIGHT;
-                    int doorX = x + ROOM_WIDTH / 2 - DOOR_HEIGHT / 2;
+                    int doorX = x + ROOM_WIDTH / 2 - DOOR_WIDTH / 2;
 
                     // Left part of the wall
-                    walls.add(new Rectangle(x, wallY, ROOM_WIDTH / 2 - DOOR_HEIGHT / 2, WALL_THICKNESS));
+                    walls.add(new Rectangle(x, wallY, ROOM_WIDTH / 2 - DOOR_WIDTH / 2, WALL_THICKNESS));
                     // Right part of the wall
-                    walls.add(new Rectangle(doorX + DOOR_HEIGHT, wallY, ROOM_WIDTH / 2 - DOOR_HEIGHT / 2, WALL_THICKNESS));
+                    walls.add(new Rectangle(doorX + DOOR_WIDTH, wallY, ROOM_WIDTH / 2 - DOOR_WIDTH / 2, WALL_THICKNESS));
                     // Door
-                    doors.add(new Rectangle(doorX, wallY, DOOR_HEIGHT, DOOR_WIDTH));
+                    doors.add(new Rectangle(doorX, wallY, DOOR_WIDTH, WALL_THICKNESS));
                 }
             }
         }
