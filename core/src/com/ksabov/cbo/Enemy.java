@@ -20,6 +20,7 @@ public class Enemy extends Actor implements RendererAware {
     private final float initialY;
     private final TextureRegion textureRegion;
     private Rectangle bounds;
+    private Rectangle currentRoom;
 
     public Enemy(float x, float y, TextureRegion texture) {
         this.x = x;
@@ -106,5 +107,13 @@ public class Enemy extends Actor implements RendererAware {
 
     public Rectangle getBounds() {
         return bounds;
+    }
+
+    public Rectangle updateRoom(Rectangle newRoom) {
+        return currentRoom = newRoom;
+    }
+
+    public Rectangle getCurrentRoom() {
+        return currentRoom;
     }
 }

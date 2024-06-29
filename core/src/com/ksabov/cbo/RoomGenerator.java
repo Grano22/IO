@@ -32,6 +32,7 @@ public class RoomGenerator {
     private List<Rectangle> doors;
     private List<Rectangle> items; // Added items list
     private List<Enemy> enemies;
+    private int playerChosenStartRoom;
 
     public RoomGenerator(GameAssetsManager gameAssetsManager) {
         this.gameAssetsManager = gameAssetsManager;
@@ -40,10 +41,24 @@ public class RoomGenerator {
         doors = new ArrayList<>();
         items = new ArrayList<>(); // Initialize items list
         enemies = new ArrayList<>();
+    }
+
+    public void generateEverything() {
+        playerChosenStartRoom = randomizeRoom(GRID_COLS * GRID_ROWS);
         generateRooms();
         generateWallsAndDoors();
         generateBoundaryWalls();
         generateItems();
+    }
+
+    public Rectangle getChosenPlayerStartRoom() {
+        return rooms.get(playerChosenStartRoom);
+    }
+
+    public int randomizeRoom(int howMuchRooms) {
+        Random random = new Random();
+
+        return random.nextInt(howMuchRooms - 1);
     }
 
     private void generateRooms() {
@@ -68,6 +83,7 @@ public class RoomGenerator {
             float x = room.x + WALL_THICKNESS + Enemy.DEFAULT_WIDTH / 2 + random.nextFloat() * (reducedRoomWidth - 2 * (WALL_THICKNESS + Enemy.DEFAULT_WIDTH / 2));
             float y = room.y + WALL_THICKNESS + Enemy.DEFAULT_HEIGHT / 2 + random.nextFloat() * (reducedRoomHeight - 2 * (WALL_THICKNESS + Enemy.DEFAULT_HEIGHT / 2));
             Enemy enemy = new Enemy(x, y, gameAssetsManager.getMapTextureRegion(GameAssetsManager.ENEMY_WALKING));
+            enemy.updateRoom(room);
             enemies.add(enemy);
             //room.addEnemy(enemy);
         }

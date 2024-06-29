@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CBO extends ApplicationAdapter {
-    private final RoomOperator roomOperator = new RoomOperator();
     private SpriteBatch batch;
     private Texture wallTexture;
     private Texture roomTexture;
@@ -79,6 +78,7 @@ public class CBO extends ApplicationAdapter {
         uiSkin.add("default", textButtonStyle);
 
         roomGenerator = new RoomGenerator(gameAssetsManager);
+        roomGenerator.generateEverything();
         roomsUtils = new RoomsUtils(roomGenerator.getRooms());
         itemsGenerator = new ItemsGenerator();
 
@@ -86,8 +86,7 @@ public class CBO extends ApplicationAdapter {
         float playerX = roomGenerator.getRooms().get(0).x + roomGenerator.getRooms().get(0).width / 2;
         float playerY = roomGenerator.getRooms().get(0).y + roomGenerator.getRooms().get(0).height / 2;
         player = new Player(new Texture("hero_standard_pose.png"), playerX, playerY, Player.PLAYER_WIDTH, Player.PLAYER_HEIGHT, 200); // Reduced player size
-        Rectangle randomizedRoom = roomOperator.randomizeRoom(roomGenerator.getRooms());
-        player.moveToRoom(randomizedRoom);
+        player.moveToRoom(roomGenerator.getChosenPlayerStartRoom());
 
         Optional<Rectangle> exitPointResult = itemsGenerator.generateExitPoint(player, roomsUtils);
 
@@ -285,9 +284,10 @@ public class CBO extends ApplicationAdapter {
 
     public void resetLevel() {
         roomGenerator = new RoomGenerator(gameAssetsManager);
+        roomGenerator.generateEverything();
 
-        Rectangle randomizedRoom = roomOperator.randomizeRoom(roomGenerator.getRooms());
-        player.moveToRoom(randomizedRoom);
+
+        player.moveToRoom(roomGenerator.getChosenPlayerStartRoom());
         Rectangle farthestRoom = roomsUtils.getFarthestRoomToThePlayer(player);
         exitPoint.setPosition(farthestRoom.x, farthestRoom.y);
     }
