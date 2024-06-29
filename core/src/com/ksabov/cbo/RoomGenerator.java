@@ -57,18 +57,20 @@ public class RoomGenerator {
 
     public int randomizeRoom(int howMuchRooms) {
         Random random = new Random();
-
         return random.nextInt(howMuchRooms - 1);
     }
 
     private void generateRooms() {
+        System.out.println(playerChosenStartRoom);
         for (int row = 0; row < GRID_ROWS; row++) {
             for (int col = 0; col < GRID_COLS; col++) {
                 int x = col * (ROOM_WIDTH + WALL_THICKNESS) + BORDER_SIZE;
                 int y = row * (ROOM_HEIGHT + WALL_THICKNESS) + BORDER_SIZE;
                 Rectangle room = new Rectangle(x, y, ROOM_WIDTH, ROOM_HEIGHT);
                 rooms.add(room);
-                generateEnemies(room);
+                if (playerChosenStartRoom != row * GRID_COLS + col) {
+                    generateEnemies(room);
+                }
             }
         }
     }
