@@ -3,6 +3,7 @@ package com.ksabov.cbo;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
@@ -99,5 +100,13 @@ public class Enemy extends Actor implements Drawable {
     @Override
     public void render(GraphicRenderer graphic) {
         graphic.renderRectangle(bounds, textureRegion.getTexture());
+    }
+
+    public Vector2 getPosition() {
+        return new Vector2(x, y);
+    }
+
+    public Rectangle getBounds() {
+        return bounds;
     }
 }

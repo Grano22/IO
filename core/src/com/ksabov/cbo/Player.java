@@ -20,6 +20,7 @@ public class Player {
     private float interactionDistance = 40; // Distance from the door to interact
     private int points; // Points for collecting items
     private Rectangle currentRoom;
+    private int life = 1;
 
     public Player(Texture texture, float x, float y, float width, float height, float speed) {
         this.texture = texture;
@@ -159,5 +160,14 @@ public class Player {
 
     public boolean isInThisSameRoom(Rectangle room) {
         return currentRoom == room;
+    }
+
+    public boolean isAlive() {
+        return life > 0;
+    }
+
+    public void takeDamage() {
+        this.life--;
+        System.out.println("life out!");
     }
 }
