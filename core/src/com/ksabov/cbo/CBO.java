@@ -11,7 +11,10 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Rectangle;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CBO extends ApplicationAdapter {
     private final RoomOperator roomOperator = new RoomOperator();
@@ -31,6 +34,7 @@ public class CBO extends ApplicationAdapter {
     private Texture enemyTexture;
     private OrthographicCamera hudCamera; // Separate camera for HUD
     private GameAssetsManager gameAssetsManager;
+    private final CollisionPositionApplier collisionPositionApplier = new CollisionPositionApplier();
 
     private Rectangle exitPoint;
 
@@ -87,6 +91,8 @@ public class CBO extends ApplicationAdapter {
     public void render() {
         float delta = Gdx.graphics.getDeltaTime();
 
+        List<Rectangle> collidingBounds = Stream.concat(roomGenerator.getWalls().stream(), roomGenerator.getDoors().stream())
+                .collect(Collectors.toList());
         chatPlayer.update(delta, roomGenerator.getWalls(), roomGenerator.getDoors(), roomGenerator.getItems(), roomGenerator); // Pass doors and items list to player update
 
         camera.position.set(chatPlayer.getPosition().x + chatPlayer.getBounds().width / 2, chatPlayer.getPosition().y + chatPlayer.getBounds().height / 2, 0);
@@ -105,7 +111,7 @@ public class CBO extends ApplicationAdapter {
         }
 
         for (Enemy enemy: roomGenerator.getEnemies()) {
-            enemy.followPlayer(chatPlayer);
+            enemy.followPlayer(chatPlayer, collisionPositionApplier.apply(collidingBounds));
         }
 
         batch.begin();

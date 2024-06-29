@@ -3,8 +3,13 @@ package com.ksabov.cbo;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 
-public class Enemy implements Drawable {
+import java.util.function.Function;
+
+public class Enemy extends Actor implements Drawable {
     public static float DEFAULT_WIDTH = 30;
     public static float DEFAULT_HEIGHT = 30;
 
@@ -22,7 +27,7 @@ public class Enemy implements Drawable {
         this.y = y;
         this.initialX = x;
         this.initialY = y;
-        this.bounds = new Rectangle(x, y, width, height);
+        updateBounds();
         textureRegion = texture;
     }
 
@@ -62,12 +67,23 @@ public class Enemy implements Drawable {
         return this.x == initialX && this.y == initialY;
     }
 
-    public void followPlayer(Player player) {
+    public void followPlayer(Player player, Function<MoveToAction, MoveToAction> collisionPositionApplier) {
         if (player.isInThisSameRoom(player.getCurrentRoom())) {
-            if (player.getPosition().x > this.x) this.x++;
-            if (player.getPosition().x < this.x) this.x--;
-            if (player.getPosition().y > this.y) this.y++;
-            if (player.getPosition().y < this.y) this.y--;
+            MoveToAction nextMove = new MoveToAction();
+            nextMove.setStartPosition(this.x, this.y);
+            nextMove.setActor(this);
+
+            float nextX = nextMove.getStartX();
+            float nextY = nextMove.getStartY();
+            if (player.getPosition().x > nextX) nextX++;
+            if (player.getPosition().x < nextX) nextX--;
+            if (player.getPosition().y > nextY) nextY++;
+            if (player.getPosition().y < nextY) nextY--;
+
+            nextMove.setPosition(nextX, nextY);
+            nextMove = collisionPositionApplier.apply(nextMove);
+            x = nextMove.getX();
+            y = nextMove.getY();
             updateBounds();
         } else {
             returnToInitialPosition();
@@ -76,6 +92,8 @@ public class Enemy implements Drawable {
 
     private void updateBounds() {
         bounds = new Rectangle(x, y, width, height);
+        setWidth(width);
+        setHeight(height);
     }
 
     @Override
