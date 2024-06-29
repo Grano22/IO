@@ -2,21 +2,18 @@ package com.ksabov.cbo;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import javax.swing.*;
@@ -66,9 +63,13 @@ public class CBO extends ApplicationAdapter {
 
         Texture buttonUpTexture = new Texture(Gdx.files.internal("ui_btn.png"));
         Texture buttonDownTexture = new Texture(Gdx.files.internal("ui_btn.png"));
+        Texture boxBackgroundTexture = new Texture(Gdx.files.internal("menu_box.png"));
+        Texture headerTexture = new Texture(Gdx.files.internal("game_title.png"));
 
         uiSkin.add("buttonUp", buttonUpTexture);
         uiSkin.add("buttonDown", buttonDownTexture);
+        uiSkin.add("boxBackground", boxBackgroundTexture);
+        uiSkin.add("header", headerTexture);
 
         TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle();
         textButtonStyle.up = new TextureRegionDrawable(new TextureRegion(buttonUpTexture));
@@ -105,14 +106,16 @@ public class CBO extends ApplicationAdapter {
         hudCamera.position.set(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, 0);
         hudCamera.update();
 
-        Gdx.input.setInputProcessor(new InputAdapter() {
+        InputMultiplexer inputMultiplexer = new InputMultiplexer();
+        inputMultiplexer.addProcessor(new InputAdapter() {
             @Override
             public boolean scrolled(float amountX, float amountY) {
                 camera.zoom += amountY * 0.1f;
                 return true;
             }
         });
-
+        inputMultiplexer.addProcessor(stage);
+        Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
     @Override
@@ -129,19 +132,21 @@ public class CBO extends ApplicationAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.setProjectionMatrix(camera.combined);
 
-        if (player.getBounds().overlaps(exitPoint)) {
-            roomGenerator = new RoomGenerator(gameAssetsManager);
-            player.setPoints(0);
-            Rectangle randomizedRoom = roomOperator.randomizeRoom(roomGenerator.getRooms());
-            player.moveToRoom(randomizedRoom);
-            Rectangle farthestRoom = roomsUtils.getFarthestRoomToThePlayer(player);
-            exitPoint.setPosition(farthestRoom.x, farthestRoom.y);
-        }
+        if (player.isAlive()) {
+            if (player.getBounds().overlaps(exitPoint)) {
+                roomGenerator = new RoomGenerator(gameAssetsManager);
+                player.setPoints(0);
+                Rectangle randomizedRoom = roomOperator.randomizeRoom(roomGenerator.getRooms());
+                player.moveToRoom(randomizedRoom);
+                Rectangle farthestRoom = roomsUtils.getFarthestRoomToThePlayer(player);
+                exitPoint.setPosition(farthestRoom.x, farthestRoom.y);
+            }
 
-        checkPlayerEnemyCollision();
+            checkPlayerEnemyCollision();
 
-        for (Enemy enemy: roomGenerator.getEnemies()) {
-            enemy.followPlayer(player, collisionPositionApplier.apply(collidingBounds));
+            for (Enemy enemy : roomGenerator.getEnemies()) {
+                enemy.followPlayer(player, collisionPositionApplier.apply(collidingBounds));
+            }
         }
 
         batch.begin();
@@ -188,18 +193,70 @@ public class CBO extends ApplicationAdapter {
     }
 
     private void showGameOverDialog() {
-        // No atlas pleaseee!!
-//        Dialog dialog = new Dialog("Game Over", uiSkin) {
+        Table table = new Table();
+        table.setFillParent(true);
+        //table.setBackground(new TextureRegionDrawable(new TextureRegion(uiSkin.getRegion("boxBackground"))));
+//        table.setBackground(new TextureRegionDrawable(new TextureRegion(uiSkin.getRegion("boxBackground").getTexture())) {
 //            @Override
-//            protected void result(Object object) {
-//                if ((Boolean) object) {
-//                    //restartGame();
-//                }
+//            public void draw(Batch batch, float x, float y, float width, float height) {
+//                batch.draw(uiSkin.getRegion("boxBackground").getTexture(), x, y, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 //            }
-//        };
-//        dialog.text("Game Over!\nPoints: " + player.getPoints());
-//        dialog.button("Restart", true);
-//        dialog.show(stage);
+//        });
+        //table.setBackground(new StretchableDrawable(new TextureRegion(uiSkin.getRegion("boxBackground"))));
+//        TextureRegionDrawable backgroundDrawable = new TextureRegionDrawable(new TextureRegion(uiSkin.getRegion("boxBackground").getTexture()));
+//        backgroundDrawable.setMinWidth(Gdx.graphics.getWidth());
+//        backgroundDrawable.setMinHeight(Gdx.graphics.getHeight());
+
+        table.top().left();
+        Drawable tableBackground = new Drawable() {
+            @Override
+            public void draw(Batch batch, float x, float y, float width, float height) {
+                batch.draw(uiSkin.getRegion("boxBackground").getTexture(), x, y, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            }
+
+            @Override
+            public float getLeftWidth() { return 0; }
+
+            @Override
+            public void setLeftWidth(float leftWidth) { }
+
+            @Override
+            public float getRightWidth() { return 0; }
+
+            @Override
+            public void setRightWidth(float rightWidth) { }
+
+            @Override
+            public float getTopHeight() { return 0; }
+
+            @Override
+            public void setTopHeight(float topHeight) { }
+
+            @Override
+            public float getBottomHeight() { return 0; }
+
+            @Override
+            public void setBottomHeight(float bottomHeight) { }
+
+            @Override
+            public float getMinWidth() { return 0; }
+
+            @Override
+            public void setMinWidth(float minWidth) { }
+
+            @Override
+            public float getMinHeight() { return 0; }
+
+            @Override
+            public void setMinHeight(float minHeight) { }
+        };
+        table.setBackground(tableBackground);
+
+        stage.addActor(table);
+
+        Image header = new Image(new TextureRegionDrawable(new TextureRegion(uiSkin.getRegion("header"))));
+        table.add(header).center().padBottom(20);
+        table.row();
 
         TextButton button = new TextButton("Restart", uiSkin);
         button.setPosition(Gdx.graphics.getWidth() / 2f - 50, Gdx.graphics.getHeight() / 2f - 25); // Center the button
@@ -208,10 +265,29 @@ public class CBO extends ApplicationAdapter {
             public void clicked(InputEvent event, float x, float y) {
                 //restartGame();
                 System.out.println("something");
-                stage.getActors().removeRange(0, stage.getActors().size);
+                //stage.getActors().removeRange(0, stage.getActors().size);
+                stage.clear();
             }
         });
-        stage.addActor(button);
+        //stage.addActor(button);
+
+        //table.add(button).center();
+        table.add(button).width(Value.percentWidth(0.8f, table)).height(Value.percentHeight(0.1f, table)).pad(10);
+
+        // Display the dialog
+        //table.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f);
+        table.setSize(uiSkin.getRegion("boxBackground").getTexture().getWidth(), uiSkin.getRegion("boxBackground").getTexture().getHeight());
+
+        // Center the table on the screen
+//        table.setPosition(
+//                (Gdx.graphics.getWidth() - table.getWidth()) / 2,
+//                (Gdx.graphics.getHeight() - table.getHeight()) / 2
+//        );
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
     }
 
     @Override

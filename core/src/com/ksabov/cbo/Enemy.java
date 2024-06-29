@@ -1,16 +1,14 @@
 package com.ksabov.cbo;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 
 import java.util.function.Function;
 
-public class Enemy extends Actor implements Drawable {
+public class Enemy extends Actor implements RendererAware {
     public static float DEFAULT_WIDTH = 30;
     public static float DEFAULT_HEIGHT = 30;
 

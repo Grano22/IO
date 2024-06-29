@@ -25,8 +25,8 @@ public class GraphicRenderer {
         }
     }
 
-    public void render(Iterable<? extends Drawable> toRender) {
-        for (Drawable drawable : toRender) {
+    public void render(Iterable<? extends RendererAware> toRender) {
+        for (RendererAware drawable : toRender) {
             drawable.render(this);
         }
     }

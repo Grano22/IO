@@ -1,5 +1,5 @@
 package com.ksabov.cbo;
 
-public interface Drawable {
+public interface RendererAware {
     public void render(GraphicRenderer graphic);
 }
