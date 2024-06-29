@@ -134,12 +134,7 @@ public class CBO extends ApplicationAdapter {
 
         if (player.isAlive()) {
             if (player.getBounds().overlaps(exitPoint)) {
-                roomGenerator = new RoomGenerator(gameAssetsManager);
-                player.setPoints(0);
-                Rectangle randomizedRoom = roomOperator.randomizeRoom(roomGenerator.getRooms());
-                player.moveToRoom(randomizedRoom);
-                Rectangle farthestRoom = roomsUtils.getFarthestRoomToThePlayer(player);
-                exitPoint.setPosition(farthestRoom.x, farthestRoom.y);
+                resetLevel();
             }
 
             checkPlayerEnemyCollision();
@@ -263,10 +258,8 @@ public class CBO extends ApplicationAdapter {
         button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //restartGame();
-                System.out.println("something");
-                //stage.getActors().removeRange(0, stage.getActors().size);
                 stage.clear();
+                restartGame();
             }
         });
         //stage.addActor(button);
@@ -283,6 +276,20 @@ public class CBO extends ApplicationAdapter {
 //                (Gdx.graphics.getWidth() - table.getWidth()) / 2,
 //                (Gdx.graphics.getHeight() - table.getHeight()) / 2
 //        );
+    }
+
+    public void restartGame() {
+        resetLevel();
+        player.reset();
+    }
+
+    public void resetLevel() {
+        roomGenerator = new RoomGenerator(gameAssetsManager);
+
+        Rectangle randomizedRoom = roomOperator.randomizeRoom(roomGenerator.getRooms());
+        player.moveToRoom(randomizedRoom);
+        Rectangle farthestRoom = roomsUtils.getFarthestRoomToThePlayer(player);
+        exitPoint.setPosition(farthestRoom.x, farthestRoom.y);
     }
 
     @Override

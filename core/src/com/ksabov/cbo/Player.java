@@ -170,4 +170,9 @@ public class Player {
         this.life--;
         System.out.println("life out!");
     }
+
+    public void reset() {
+        setPoints(0);
+        life = 1;
+    }
 }
