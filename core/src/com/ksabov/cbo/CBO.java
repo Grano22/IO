@@ -104,6 +104,10 @@ public class CBO extends ApplicationAdapter {
             exitPoint.setPosition(farthestRoom.x, farthestRoom.y);
         }
 
+        for (Enemy enemy: roomGenerator.getEnemies()) {
+            enemy.followPlayer(chatPlayer);
+        }
+
         batch.begin();
         // Render walls
         roomGenerator.renderWalls(batch, wallTexture);

@@ -156,4 +156,8 @@ public class Player {
     public boolean isInRoom() {
         return currentRoom != null;
     }
+
+    public boolean isInThisSameRoom(Rectangle room) {
+        return currentRoom == room;
+    }
 }

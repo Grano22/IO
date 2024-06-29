@@ -49,8 +49,13 @@ public class Enemy implements Drawable {
     }
 
     public void returnToInitialPosition() {
-        this.x = initialX;
-        this.y = initialY;
+        if (!isAtInitialPosition()) {
+            if (x < initialX) x++;
+            else if (x > initialX) x--;
+
+            if (y < initialY) y++;
+            else if (y > initialY) y--;
+        }
     }
 
     public boolean isAtInitialPosition() {
@@ -58,7 +63,7 @@ public class Enemy implements Drawable {
     }
 
     public void followPlayer(Player player) {
-        if (player.isInRoom()) {
+        if (player.isInThisSameRoom(player.getCurrentRoom())) {
             if (player.getPosition().x > this.x) this.x++;
             if (player.getPosition().x < this.x) this.x--;
             if (player.getPosition().y > this.y) this.y++;

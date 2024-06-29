@@ -63,8 +63,10 @@ public class RoomGenerator {
         int numEnemies = random.nextInt(MAX_ENEMIES_PER_ROOM) + 1;
 
         for (int i = 0; i < numEnemies; i++) {
-            float x = room.x + WALL_THICKNESS + Enemy.DEFAULT_WIDTH / 2 + random.nextFloat() * (room.width - 2 * (WALL_THICKNESS + Enemy.DEFAULT_WIDTH / 2));
-            float y = room.y + WALL_THICKNESS + Enemy.DEFAULT_HEIGHT / 2 + random.nextFloat() * (room.height - 2 * (WALL_THICKNESS + Enemy.DEFAULT_HEIGHT / 2));
+            final float reducedRoomWidth = room.width - 2 * 10;
+            final float reducedRoomHeight = room.height - 2 * 10;
+            float x = room.x + WALL_THICKNESS + Enemy.DEFAULT_WIDTH / 2 + random.nextFloat() * (reducedRoomWidth - 2 * (WALL_THICKNESS + Enemy.DEFAULT_WIDTH / 2));
+            float y = room.y + WALL_THICKNESS + Enemy.DEFAULT_HEIGHT / 2 + random.nextFloat() * (reducedRoomHeight - 2 * (WALL_THICKNESS + Enemy.DEFAULT_HEIGHT / 2));
             Enemy enemy = new Enemy(x, y, gameAssetsManager.getMapTextureRegion(GameAssetsManager.ENEMY_WALKING));
             enemies.add(enemy);
             //room.addEnemy(enemy);
