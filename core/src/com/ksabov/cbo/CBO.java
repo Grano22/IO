@@ -23,33 +23,37 @@ public class CBO extends ApplicationAdapter {
     private BitmapFont font;
     private RoomGenerator roomGenerator;
     private ItemsGenerator itemsGenerator;
-    private ItemsRenderer itemsRenderer = new ItemsRenderer();
+    private GraphicRenderer graphic;
     private RoomsUtils roomsUtils;
     private Player chatPlayer;
     private OrthographicCamera camera;
     private Texture exitTexture;
+    private Texture enemyTexture;
     private OrthographicCamera hudCamera; // Separate camera for HUD
+    private GameAssetsManager gameAssetsManager;
 
     private Rectangle exitPoint;
 
     @Override
     public void create() {
         batch = new SpriteBatch();
+        graphic = new GraphicRenderer(batch);
         wallTexture = new Texture("wall.jpg");
         roomTexture = new Texture("main_map.png");
         doorTexture = new Texture("door.png");
         itemTexture = new Texture("item.png");
         exitTexture = new Texture("exit.png");
         font = new BitmapFont(); // Default font
+        gameAssetsManager = new GameAssetsManager();
 
-        roomGenerator = new RoomGenerator();
+        roomGenerator = new RoomGenerator(gameAssetsManager);
         roomsUtils = new RoomsUtils(roomGenerator.getRooms());
         itemsGenerator = new ItemsGenerator();
 
         // Example initial player position
         float playerX = roomGenerator.getRooms().get(0).x + roomGenerator.getRooms().get(0).width / 2;
         float playerY = roomGenerator.getRooms().get(0).y + roomGenerator.getRooms().get(0).height / 2;
-        chatPlayer = new Player(new Texture("hero_standard_pose.png"), playerX, playerY, 30, 30, 200); // Reduced player size
+        chatPlayer = new Player(new Texture("hero_standard_pose.png"), playerX, playerY, Player.PLAYER_WIDTH, Player.PLAYER_HEIGHT, 200); // Reduced player size
         Rectangle randomizedRoom = roomOperator.randomizeRoom(roomGenerator.getRooms());
         chatPlayer.moveToRoom(randomizedRoom);
 
@@ -92,7 +96,7 @@ public class CBO extends ApplicationAdapter {
         batch.setProjectionMatrix(camera.combined);
 
         if (chatPlayer.getBounds().overlaps(exitPoint)) {
-            roomGenerator = new RoomGenerator();
+            roomGenerator = new RoomGenerator(gameAssetsManager);
             chatPlayer.setPoints(0);
             Rectangle randomizedRoom = roomOperator.randomizeRoom(roomGenerator.getRooms());
             chatPlayer.moveToRoom(randomizedRoom);
@@ -111,7 +115,8 @@ public class CBO extends ApplicationAdapter {
         roomGenerator.renderDoors(batch, doorTexture);
         // Render items
         roomGenerator.renderItems(batch, itemTexture);
-        itemsRenderer.renderExitPoint(exitPoint, batch, exitTexture);
+        graphic.renderRectangle(exitPoint, batch, exitTexture);
+        graphic.render(roomGenerator.getEnemies());
         batch.end();
 
         // Render points (fixed on screen)

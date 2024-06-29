@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class RoomGenerator {
     private static final int GRID_ROWS = 4; // Number of rows in the grid
@@ -22,16 +23,23 @@ public class RoomGenerator {
     private static final int ITEM_SIZE = 20; // Size of items
     private static final int NUM_ITEMS = 10; // Number of items to generate
 
+    private int MAX_ENEMIES_PER_ROOM = 2;
+
+    private final GameAssetsManager gameAssetsManager;
+
     private List<Rectangle> rooms;
     private List<Rectangle> walls;
     private List<Rectangle> doors;
     private List<Rectangle> items; // Added items list
+    private List<Enemy> enemies;
 
-    public RoomGenerator() {
+    public RoomGenerator(GameAssetsManager gameAssetsManager) {
+        this.gameAssetsManager = gameAssetsManager;
         rooms = new ArrayList<>();
         walls = new ArrayList<>();
         doors = new ArrayList<>();
         items = new ArrayList<>(); // Initialize items list
+        enemies = new ArrayList<>();
         generateRooms();
         generateWallsAndDoors();
         generateBoundaryWalls();
@@ -45,7 +53,21 @@ public class RoomGenerator {
                 int y = row * (ROOM_HEIGHT + WALL_THICKNESS) + BORDER_SIZE;
                 Rectangle room = new Rectangle(x, y, ROOM_WIDTH, ROOM_HEIGHT);
                 rooms.add(room);
+                generateEnemies(room);
             }
+        }
+    }
+
+    private void generateEnemies(Rectangle room) {
+        final Random random = new Random();
+        int numEnemies = random.nextInt(MAX_ENEMIES_PER_ROOM) + 1;
+
+        for (int i = 0; i < numEnemies; i++) {
+            float x = room.x + WALL_THICKNESS + Enemy.DEFAULT_WIDTH / 2 + random.nextFloat() * (room.width - 2 * (WALL_THICKNESS + Enemy.DEFAULT_WIDTH / 2));
+            float y = room.y + WALL_THICKNESS + Enemy.DEFAULT_HEIGHT / 2 + random.nextFloat() * (room.height - 2 * (WALL_THICKNESS + Enemy.DEFAULT_HEIGHT / 2));
+            Enemy enemy = new Enemy(x, y, gameAssetsManager.getMapTextureRegion(GameAssetsManager.ENEMY_WALKING));
+            enemies.add(enemy);
+            //room.addEnemy(enemy);
         }
     }
 
@@ -138,6 +160,10 @@ public class RoomGenerator {
 
     public List<Rectangle> getItems() {
         return items;
+    }
+
+    public List<Enemy> getEnemies() {
+        return enemies;
     }
 
     public void renderRooms(SpriteBatch batch, Texture roomTexture) {

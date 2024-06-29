@@ -10,6 +10,9 @@ import com.badlogic.gdx.Input;
 import java.util.List;
 
 public class Player {
+    public static float PLAYER_WIDTH = 30;
+    public static float PLAYER_HEIGHT = 30;
+
     private Texture texture;
     private Rectangle bounds;
     private Vector2 position;
@@ -148,5 +151,9 @@ public class Player {
 
     public Rectangle getCurrentRoom() {
         return currentRoom;
+    }
+
+    public boolean isInRoom() {
+        return currentRoom != null;
     }
 }
