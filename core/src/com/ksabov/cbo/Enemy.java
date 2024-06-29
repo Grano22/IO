@@ -60,6 +60,8 @@ public class Enemy extends Actor implements RendererAware {
 
             if (y < initialY) y++;
             else if (y > initialY) y--;
+
+            updateBounds();
         }
     }
 
@@ -68,7 +70,7 @@ public class Enemy extends Actor implements RendererAware {
     }
 
     public void followPlayer(Player player, Function<MoveToAction, MoveToAction> collisionPositionApplier) {
-        if (player.isInThisSameRoom(player.getCurrentRoom())) {
+        if (player.isInThisSameRoom(currentRoom)) {
             MoveToAction nextMove = new MoveToAction();
             nextMove.setStartPosition(this.x, this.y);
             nextMove.setActor(this);

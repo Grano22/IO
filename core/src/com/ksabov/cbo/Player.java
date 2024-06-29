@@ -175,4 +175,11 @@ public class Player {
         setPoints(0);
         life = 1;
     }
+
+    public void updateRoom(Rectangle newRoom) {
+        if (newRoom != currentRoom) {
+            currentRoom = newRoom;
+            System.out.println("ROom changed to" + currentRoom);
+        }
+    }
 }

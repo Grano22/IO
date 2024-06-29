@@ -124,6 +124,7 @@ public class CBO extends ApplicationAdapter {
         List<Rectangle> collidingBounds = Stream.concat(roomGenerator.getWalls().stream(), roomGenerator.getDoors().stream())
                 .collect(Collectors.toList());
         player.update(delta, roomGenerator.getWalls(), roomGenerator.getDoors(), roomGenerator.getItems(), roomGenerator); // Pass doors and items list to player update
+        player.updateRoom(roomGenerator.getRooms().get(roomGenerator.getRoomIndexFromCoordinates(player.getPosition().x, player.getPosition().y)));
 
         camera.position.set(player.getPosition().x + player.getBounds().width / 2, player.getPosition().y + player.getBounds().height / 2, 0);
         camera.update();

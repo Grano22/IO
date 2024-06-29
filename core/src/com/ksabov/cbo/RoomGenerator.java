@@ -217,4 +217,10 @@ public class RoomGenerator {
     public void removeItem(Rectangle item) {
         items.remove(item);
     }
+
+    public int getRoomIndexFromCoordinates(float x, float y) {
+        int col = (int) ((x - BORDER_SIZE) / (ROOM_WIDTH + WALL_THICKNESS));
+        int row = (int) ((y - BORDER_SIZE) / (ROOM_HEIGHT + WALL_THICKNESS));
+        return row * GRID_COLS + col;
+    }
 }
