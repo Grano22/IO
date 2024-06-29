@@ -23,7 +23,7 @@ public class RoomGenerator {
     private static final int ITEM_SIZE = 20; // Size of items
     private static final int NUM_ITEMS = 10; // Number of items to generate
 
-    private int MAX_ENEMIES_PER_ROOM = 2;
+    private int MAX_ENEMIES_PER_ROOM = 1;
 
     private final GameAssetsManager gameAssetsManager;
 

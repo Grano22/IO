@@ -3,6 +3,7 @@ package com.ksabov.cbo;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
@@ -76,6 +77,12 @@ public class CBO extends ApplicationAdapter {
         textButtonStyle.font = font;
 
         uiSkin.add("default", textButtonStyle);
+
+        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        labelStyle.font = font;
+        labelStyle.fontColor = Color.WHITE;
+
+        uiSkin.add("default", labelStyle);
 
         roomGenerator = new RoomGenerator(gameAssetsManager);
         roomGenerator.generateEverything();
@@ -251,6 +258,12 @@ public class CBO extends ApplicationAdapter {
 
         Image header = new Image(new TextureRegionDrawable(new TextureRegion(uiSkin.getRegion("header"))));
         table.add(header).center().padBottom(20);
+        table.row();
+
+        Label scoreHolder = new Label("Gained score: " + player.getPoints(), uiSkin);
+        scoreHolder.setFontScale(2);
+
+        table.add(scoreHolder).expandX().padTop(10).padBottom(10);
         table.row();
 
         TextButton button = new TextButton("Restart", uiSkin);
